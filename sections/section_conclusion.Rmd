@@ -1,6 +1,0 @@
----
-title: "section conclusions"
-output: html_document
----
-
-This could be a text file for conclusions from a section, like in the birds files. 
