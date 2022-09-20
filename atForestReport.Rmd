@@ -7,15 +7,7 @@ output:
         in_header: "header_manual.html" 
         after_body: "footer.html"
 params:
-  network: NETN
-  Park: MORR
-  state: NJ
-  year: 2019
-  bcr: 28
-  BCRName: Appalachian Mountains
-  BBSRegion: S28
-  minYear: 2006
-  maxYear: 2019
+  region: Northeast
 ---
       
 ```{r setup, include=FALSE}
@@ -36,12 +28,12 @@ library(formattable)
 library(RColorBrewer)
 ```
 
-`getParkNames(BirdData[ParkList == params$Park], name.class = "long")`{.tabset .tabset-fade .tabset-pills}
+`r params$region` Region{.tabset .tabset-fade .tabset-pills}
 ------------------------------------
 ## {.tabset}
 ### Overview
 <div style="float:right;position:relative;top:10px;padding:5px 5px 5px 10px;margin:0px 5px 10px 5px">
-```{r Effmap, echo = FALSE,  fig.height=5.75, fig.width= 5.75, fig.align = 'left', warning= FALSE, comment=FALSE, message=FALSE,}
+```{r, echo = FALSE,  fig.height=5.75, fig.width= 5.75, fig.align = 'left', warning= FALSE, comment=FALSE, message=FALSE,}
 # Map of AT with HUC10 Shell and AT center line zoomed into selected subregion (NE) showing number of FIA plots per ecoregion as chloropleth. 
 ggplot()
 ```
@@ -55,7 +47,7 @@ Map of AT with HUC10 Shell and AT center line zoomed into selected subregion (NE
 Could use text from Stanke’s website: Forests of the Appalachian National Scenic Trail | rFIA
 (Once the basic template is built I can add in the text summarizing the data for the managers.) </p>
 
-<h3>Methods (or other header)</h3>
+<h3>another generic header</h3>
 
 <p> More text. </p>
 
@@ -63,50 +55,105 @@ Could use text from Stanke’s website: Forests of the Appalachian National Scen
 
 <p>  Text block describing metrics for most recent Species Diversity. Shannon’s Diversity Index (alpha) Shannon’s Evenness Index (alpha) Species Richness (alpha) e.g., Species diversity | rFIA I would also use this area to describe basic patterns </p> 
 
-
 #### Shannon’s Diversity Index (alpha)
 
-<p> <b>text in tab in bold</b> </p> 
-
-<p class='caption'>
-```{r richness, echo = TRUE, echo=FALSE, fig.height=4, fig.width= 10, fig.align = 'left', fig.cap= "Figure 1. Observed (blue) and estimated (green) species richness over time. Data summaries exclude species not suspected to be breeding in the forest (e.g., flyovers). The number of species estimated (green) is based on the study by Doser et al. (2021), which accounts for imperfect detection and the effect of forest structure. Note that this plot is not showing the total number of bird species in the park because our methods specifically focus on forest songbirds. Other bird species may be present in the park that are not detected during monitoring."}
-
+<div style="float:right;position:relative;top:10px;padding:5px 5px 5px 10px;margin:0px 5px 10px 5px">
+```{r, echo = FALSE,  fig.height=5.75, fig.width= 5.75, fig.align = 'left', warning= FALSE, comment=FALSE, message=FALSE}
+ggplot()
 ```
-</p>
+<p class='capwrap'>
+Shannon's Diversity Index Plot  </p>
+</div>
 
-```{r, richPark, echo=F, fig.align = 'left',fig.cap= "Figure 2. Total number of species detected per park during surveys since monitoring began."}
-
+<div style="float:right;position:relative;top:10px;padding:5px 5px 5px 10px;margin:0px 5px 10px 5px">
+```{r, echo = FALSE,  fig.height=5.75, fig.width= 5.75, fig.align = 'left', warning= FALSE, comment=FALSE, message=FALSE}
+ggplot()
 ```
+<p class='capwrap'>
+Time series Plot  </p>
+</div>
 
-```{r, richTrend, echo=F, fig.cap='Figure 3. Trends in estimated park-level species richness from 2006-2019. Points are the average species richness across all sites, gray regions denote the 95% credible intervals (measure of uncertainty). Inset text is the median (95% credible interval) linear trend estimating change per year in species richness (Doser et al. 2021). Note that observations at ELRO, HOFR, and VAMA were combined under ROVA for the analysis', fig.align='left'}
-```
-
+This text might describe the plots that relate to Shannon's Diversity Index, and might also explain the index a bit more in depth. 
 
 #### Shannon’s Evenness Index (alpha)
 
 <div style="float:right;position:relative;top:10px;padding:5px 5px 5px 10px;margin:0px 5px 10px 5px">
-```{r richmap, echo = FALSE,  fig.height=6, fig.width= 6, fig.align = 'left', warning= FALSE, comment=FALSE, message=FALSE}
+```{r, echo = FALSE,  fig.height=5.75, fig.width= 5.75, fig.align = 'left', warning= FALSE, comment=FALSE, message=FALSE}
+ggplot()
 ```
 <p class='capwrap'>
-Map of cumulative bird species richness detected at `params$Park`'s permanent monitoring sites between `params$minYear` and `params$maxYear`. Click on the sites to see species richness observed per site.</p>
+Shannon's Eveness Index Plot  </p>
 </div>
+
+<div style="float:right;position:relative;top:10px;padding:5px 5px 5px 10px;margin:0px 5px 10px 5px">
+```{r, echo = FALSE,  fig.height=5.75, fig.width= 5.75, fig.align = 'left', warning= FALSE, comment=FALSE, message=FALSE}
+ggplot()
+```
+<p class='capwrap'>
+Time series Plot  </p>
+</div>
+
+This text might describe the plots that relate to Shannon's Eveness Index, and might also explain the index a bit more in depth. 
+
 
 #### Species Richness (alpha)
 
+<div style="float:right;position:relative;top:10px;padding:5px 5px 5px 10px;margin:0px 5px 10px 5px">
+```{r, echo = FALSE,  fig.height=5.75, fig.width= 5.75, fig.align = 'left', warning= FALSE, comment=FALSE, message=FALSE}
+ggplot()
+```
+<p class='capwrap'>
+Species Richness Plot  </p>
+</div>
+
+<div style="float:right;position:relative;top:10px;padding:5px 5px 5px 10px;margin:0px 5px 10px 5px">
+```{r, echo = FALSE,  fig.height=5.75, fig.width= 5.75, fig.align = 'left', warning= FALSE, comment=FALSE, message=FALSE}
+ggplot()
+```
+<p class='capwrap'>
+Time series Plot  </p>
+</div>
+
+This text might describe the plots that relate to Species Richness, and might also explain the species richness a bit more in depth. 
+
 ### Tree Density and Biomass {.tabset }
 
-<p> text.</p>
+Text area describing metrics and patterns for density and biomass. 
+
+#### Means
 
 <div style="float:right;position:relative;top:10px;padding:1px 1px 1px 1px;margin:0px 5px 10px 5px">
-```{r BCI, echo=FALSE, fig.height=4, fig.width= 8, fig.align = 'left',fig.cap= "Figure 4. Annual Bird Community Index values averaged across the park forest. Data summaries exclude species not suspected to be breeding in the forest (e.g., flyovers). The annual BCI value shown is the average (+/-95% C.I.) BCI rating across all monitoring sites. The horizontal axis indicates the year, with the number of points monitored by visit in parenthesis.", message=FALSE}
+```{r, echo=FALSE, fig.height=4, fig.width= 4, fig.align = 'left', message=FALSE}
 ggplot()
 # Bar chart of mean species density and biomass per species by DBH class size for top 10 most abundant species
+```
+</div>
 
+<div style="float:left;position:relative;top:10px;padding:1px 1px 1px 1px;margin:0px 5px 10px 5px">
+```{r, echo=FALSE, fig.height=4, fig.width= 4, fig.align = 'right', message=FALSE}
+ggplot()
 # Time series plot showing top 5 species and Fraxinus density/biomass over time per ecoregion. It would be great to show all top 10 species but this could get a bit busy with 10 species X ecoregions). It may not be needed to show ecroregions.
 
 # It would be great to repeat the above plots for total biomass and carbon
 ```
+</div>
 
+#### Totals
+
+<div style="float:right;position:relative;top:10px;padding:1px 1px 1px 1px;margin:0px 5px 10px 5px">
+```{r, echo=FALSE, fig.height=4, fig.width= 4, fig.align = 'left', message=FALSE}
+ggplot()
+# Bar chart of mean species density and biomass per species by DBH class size for top 10 most abundant species
+```
+</div>
+
+<div style="float:left;position:relative;top:10px;padding:1px 1px 1px 1px;margin:0px 5px 10px 5px">
+```{r, echo=FALSE, fig.height=4, fig.width= 4, fig.align = 'right', message=FALSE}
+ggplot()
+# Time series plot showing top 5 species and Fraxinus density/biomass over time per ecoregion. It would be great to show all top 10 species but this could get a bit busy with 10 species X ecoregions). It may not be needed to show ecroregions.
+
+# It would be great to repeat the above plots for total biomass and carbon
+```
 </div>
 
 ### Tree Vital Rates {.tabset}
@@ -118,16 +165,66 @@ Text area describing metrics and patterns of tree growth and mortality ( tree ba
 
 # Similar map and bar charts for basal area and biomass growth
 
-# Tabular summary of mean annual mortality rates of top 10 species per ecoregion in area of interest (NE in this example) ----- this one under text not on the right like the others
-```
+# Tabular summary of mean annual mortality rates of top 10 species per ecoregion in area of interest (NE in this example)
 
+# choropleth map for diameter growth rate (in/yr)
+```
 
 ### Regeneration
 
+Text area describing regeneration.
+
+This tab would show only density and I can’t recall whether FIA denotes regen by size classes. For regen we commonly use 15-30 cm, 30-100cm, 100-150cm, > 150 and <1cm DBH, and 1-10 cm DBH
+
+<div style="float:right;position:relative;top:10px;padding:1px 1px 1px 1px;margin:0px 5px 10px 5px">
+```{r, echo=FALSE, fig.height=4, fig.width= 4, fig.align = 'left', message=FALSE}
+ggplot()
+# Bar chart of mean species density per species by DBH class size for top 10 most abundant species
+```
+</div>
+
+<div style="float:left;position:relative;top:10px;padding:1px 1px 1px 1px;margin:0px 5px 10px 5px">
+```{r, echo=FALSE, fig.height=4, fig.width= 4, fig.align = 'right', message=FALSE}
+ggplot()
+# Time series plot showing sapling density (1-10 DBH) over time per species and ecoregion. 
+
+# We also commonly report regen as a stocking index based on McWilliams (~2005). It estimates density by weighting the above size classes.
+```
+</div>
+
 ### Snags
+
+Text area describing snags per acre and by size class.
+
+<div style="float:right;position:relative;top:10px;padding:1px 1px 1px 1px;margin:0px 5px 10px 5px">
+```{r, echo=FALSE, fig.height=4, fig.width= 4, fig.align = 'left', message=FALSE}
+ggplot()
+# BBar chart of mean snag density per diameter size class for hard vs softwood (if possible)
+```
+</div>
+
+<div style="float:left;position:relative;top:10px;padding:1px 1px 1px 1px;margin:0px 5px 10px 5px">
+```{r, echo=FALSE, fig.height=4, fig.width= 4, fig.align = 'right', message=FALSE}
+ggplot()
+# Chloropleth map showing % snag abundance of total TPA; see Snag abundance | rFIA
+```
+</div>
 
 ### Downed Woody Debris
 
+Text area describing DWD: volume and CWD:live tree volume
+
+A table like this one?
+
+```{r, fig.align='center'}
+knitr::include_graphics("dwd_table.png")
+```
+
+
 ### Invasive Plants
+
+Text area describing invasive abundance of top species (shrubs and trees).
+
+Combination of chloropleth maps and time series of key species per region. It may only be possible to generate a tabular summary of presence per ecoregion depending on the state, panel and species of interest. This section could also just be a list of species detected with frequency.
 
 ### References
