@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?><metadata>
+    <idinfo>
+        <citation>
+            <citeinfo>
+                <title>AT_Centerline</title>
+                <geoform>vector digital data</geoform>
+            </citeinfo>
+        </citation>
+        <descript>
+            <abstract>The Appalachian National Scenic Trail (A.T.) is a footpath over 2,190 miles in length that traverses the Appalachian Mountains from Maine to Georgia. It passes through 14 states, approximately 241 jurisdictions, and links some 75 national and state parks and forests. Virtually every mile is within easy access of a major population center and some portion of the trail is within a day's drive of 2/3rds of the U.S. population. The idea for the trail was conceived in 1921 by forester Benton MacKaye. In 1925, he formed the Appalachian Trail Conference (now called the Appalachian Trail Conservancy), a private not-for-profit organization whose mission is to preserve, protect, and manage the Appalachian Trail. By 1937, an Appalachian Trail footpath was complete and open for all to enjoy. In 1968, Congress passed the National Trails Act that created a system of national scenic trails and placed the Appalachian Trail under the administration of the National Park Service. While officially part of the National Park System, the Appalachian Trail has continued to be managed largely by the Appalachian Trail Conservancy, in conjunction with 31 affiliated trail maintaining clubs, who work with the National Park Service Appalachian National Scenic Trail Office, USDA Forest Service, and numerous state parks, forest, and wildlife management areas as part of a unique cooperative management system.This data set provides the most current depiction of the Appalachian National Scenic Trail. Data in this format that can used on digital online maps or downloaded and used within desktop applications. Please see the access and user constraints below for more information on use of this data.</abstract>
+            <purpose>Appalachian National Scenic Trail - Official Centerline - 04-07-2022</purpose>
+        </descript>
+        <spdom>
+            <bounding>
+                <westbc>-86.0621050356148</westbc>
+                <eastbc>-67.76133674753208</eastbc>
+                <northbc>46.60940770578523</northbc>
+                <southbc>33.16763546500652</southbc>
+            </bounding>
+        </spdom>
+        <accconst>None</accconst>
+        <useconst>None</useconst>
+        <datacred>National Park Service Appalachian National Scenic Trail Office and Appalachian Trail Conservancy, 2020</datacred>
+        <native> Version 6.2 (Build 9200) ; Esri ArcGIS 10.3.1.4959</native>
+    </idinfo>
+    <spdoinfo>
+        <direct>Vector</direct>
+        <ptvctinf>
+            <sdtsterm>
+                <sdtstype>String</sdtstype>
+                <ptvctcnt>0</ptvctcnt>
+            </sdtsterm>
+        </ptvctinf>
+    </spdoinfo>
+    <eainfo>
+        <detailed>
+            <enttyp>
+                <enttypl>AT_Centerline</enttypl>
+            </enttyp>
+            <attr>
+                <attrlabl>OBJECTID</attrlabl>
+                <attrdef>Internal feature number.</attrdef>
+                <attrdefs>Esri</attrdefs>
+                <attrdomv>
+                    
+                    <udom>Sequential unique whole numbers that are automatically generated.</udom>
+                    
+                </attrdomv>
+            </attr>
+            <attr>
+                <attrlabl>Shape</attrlabl>
+                <attrdef>Feature geometry.</attrdef>
+                <attrdefs>Esri</attrdefs>
+                <attrdomv>
+                    
+                    <udom>Coordinates defining the features.</udom>
+                    
+                </attrdomv>
+            </attr>
+            <attr>
+                <attrlabl>Name</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>Alt_Name</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>Status</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>FMSS_LocID</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>Asset_ID</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>Surface</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>Shared_Use</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>Length_Ft</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>Year_Built</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>Comments</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>Max_PDOP</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>Max_HDOP</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>Corr_Type</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>Descripto</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>FBMS_ID</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>OB</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>API</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>Hist_Stat</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>Rcvr_Type</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>GPS_Date</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>GPS_Time</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>Update_Sta</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>Feat_Name</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>Datafile</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>Unfilt_Pos</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>Filt_Pos</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>Data_Dicti</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>GPS_Week</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>GNSS_Lengt</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>GNSS_3DLen</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>Avg_Vert_P</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>Avg_Horz_P</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>Worst_Vert</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>Worst_Horz</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>GFID</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>In_FMSS</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>FMSS_NAME</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>FMSS_QTY</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>Region</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>Reg_Acro</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>Trail_Club</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>Acronym</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>Source</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>Creator</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>Create_Date</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>Editor</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>Edit_Date</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>Version</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>Publish</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>Shape_Length</attrlabl>
+                <attrdef>Length of feature in internal units.</attrdef>
+                <attrdefs>Esri</attrdefs>
+                <attrdomv>
+                    
+                    <udom>Positive real numbers that are automatically generated.</udom>
+                    
+                </attrdomv>
+            </attr>
+        </detailed>
+    </eainfo>
+    <metainfo>
+        <metd>20190610</metd>
+        <metstdn>FGDC Content Standard for Digital Geospatial Metadata</metstdn>
+        <metstdv>FGDC-STD-001-1998</metstdv>
+        <mettc>local time</mettc>
+    </metainfo>
+</metadata>
