@@ -1,12 +1,3 @@
----
-output: 
-    html_document:
-      css: custom_styles.css
-      includes: 
-        in_header: "header_readme.html" 
-        after_body: "footer.html"
----
-
 # Introduction
 
 This repository contains code used for the Appalachian Scenic Trail Forest Health Monitoring Report. Below is a quick overview of the files and directories in this repository and their uses.
