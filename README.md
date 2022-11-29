@@ -1,6 +1,15 @@
-# atForestReport
+---
+output: 
+    html_document:
+      css: custom_styles.css
+      includes: 
+        in_header: "header_readme.html" 
+        after_body: "footer.html"
+---
 
-This repository contains code used for the Appalachian Trail Project. Below is a quick overview of the files in this repository and their uses.
+# Introduction
+
+This repository contains code used for the Appalachian Scenic Trail Forest Health Monitoring Report. Below is a quick overview of the files and directories in this repository and their uses.
 
 ## Repo structure/files
 
