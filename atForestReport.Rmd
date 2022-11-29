@@ -26,6 +26,16 @@ library(knitr)
 library(kableExtra)
 library(formattable)
 library(RColorBrewer)
+library(sf)
+
+# Load data
+at_centerline <- readRDS("summary_data/at_centerline.rds")
+n_plots_per_ecosubsection <- readRDS("summary_data/n_plots_per_ecosubsection.rds")
+div <- readRDS("summary_data/div.rds")
+div_year <- readRDS("summary_data/div_year.rds")
+bio_top10 <- readRDS("summary_data/bio_top10.rds")
+bio_year_top10 <- readRDS("summary_data/bio_year_top10.rds")
+
 ```
 
 `r params$region` Region{.tabset .tabset-fade .tabset-pills}
@@ -35,7 +45,26 @@ library(RColorBrewer)
 <div style="float:right;position:relative;top:10px;padding:5px 5px 5px 10px;margin:0px 5px 10px 5px">
 ```{r, echo = FALSE,  fig.height=5.75, fig.width= 5.75, fig.align = 'left', warning= FALSE, comment=FALSE, message=FALSE,}
 # Map of AT with HUC10 Shell and AT center line zoomed into selected subregion (NE) showing number of FIA plots per ecoregion as chloropleth. 
-ggplot()
+pal <- colorBin("Oranges", domain = n_plots_per_ecosubsection[["n_plots"]], bins = 9)
+
+n_plots_per_ecosubsection %>%
+  leaflet() %>%
+  addTiles() %>%
+  addPolygons(fillColor = ~ pal(n_plots_per_ecosubsection[["n_plots"]]),
+              fillOpacity = 1,
+              opacity = 0,
+              popup = paste0("<b>Ecosubsection: </b>",
+                             n_plots_per_ecosubsection[["SUBSECTION"]],
+                             "<br> <b>Number of FIA Plots: </b>",
+                             n_plots_per_ecosubsection[["n_plots"]])) %>%
+  addPolylines(data = at_centerline,
+               color = "black",
+               opacity = 1,
+               weight = 2) %>%
+  addLegend(pal = pal,
+            values = ~n_plots_per_ecosubsection[["n_plots"]],
+            title = "Number of FIA Plots",
+            position = "bottomright") 
 ```
 <p class='capwrap'>
 Map of AT with HUC10 Shell and AT center line zoomed into selected subregion (NE) showing number of FIA plots per ecoregion as chloropleth.  </p>
@@ -59,7 +88,26 @@ Could use text from Stanke’s website: Forests of the Appalachian National Scen
 
 <div style="float:right;position:relative;top:10px;padding:5px 5px 5px 10px;margin:0px 5px 10px 5px">
 ```{r, echo = FALSE,  fig.height=5.75, fig.width= 5.75, fig.align = 'left', warning= FALSE, comment=FALSE, message=FALSE}
-ggplot()
+pal <- colorBin("Purples", domain = div[["H_a"]], bins = 9)
+
+div %>%
+  leaflet() %>%
+  addTiles() %>%
+  addPolygons(fillColor = ~ pal(div[["H_a"]]),
+              fillOpacity = 1,
+              opacity = 0,
+              popup = paste0("<b>Ecosubsection: </b>",
+                             div[["SUBSECTION"]],
+                             "<br> <b>mean Shannon's Diversity Index,<br> alpha (stand) level: </b>",
+                             round(div[["H_a"]], 3))) %>%
+  addPolylines(data = at_centerline,
+               color = "black",
+               opacity = 1,
+               weight = 2) %>%
+  addLegend(pal = pal,
+            values = ~div[["H_a"]],
+            title = "mean Shannon's Diversity Index,<br> alpha (stand) level",
+            position = "bottomright") 
 ```
 <p class='capwrap'>
 Shannon's Diversity Index Plot  </p>
@@ -67,7 +115,11 @@ Shannon's Diversity Index Plot  </p>
 
 <div style="float:right;position:relative;top:10px;padding:5px 5px 5px 10px;margin:0px 5px 10px 5px">
 ```{r, echo = FALSE,  fig.height=5.75, fig.width= 5.75, fig.align = 'left', warning= FALSE, comment=FALSE, message=FALSE}
-ggplot()
+div_year %>%
+  ggplot(aes(x = MEASYEAR, y = H_a)) +
+  geom_point() + 
+  geom_line() +
+  facet_wrap(~SUBSECTION)
 ```
 <p class='capwrap'>
 Time series Plot  </p>
@@ -79,7 +131,26 @@ This text might describe the plots that relate to Shannon's Diversity Index, and
 
 <div style="float:right;position:relative;top:10px;padding:5px 5px 5px 10px;margin:0px 5px 10px 5px">
 ```{r, echo = FALSE,  fig.height=5.75, fig.width= 5.75, fig.align = 'left', warning= FALSE, comment=FALSE, message=FALSE}
-ggplot()
+pal <- colorBin("Purples", domain = div[["Eh_a"]], bins = 9)
+
+div %>%
+  leaflet() %>%
+  addTiles() %>%
+  addPolygons(fillColor = ~ pal(div[["Eh_a"]]),
+              fillOpacity = 1,
+              opacity = 0,
+              popup = paste0("<b>Ecosubsection: </b>",
+                             div[["SUBSECTION"]],
+                             "<br> <b>mean Shannon's Equitability Index,<br> alpha (stand) level: </b>",
+                             round(div[["Eh_a"]], 3))) %>%
+  addPolylines(data = at_centerline,
+               color = "black",
+               opacity = 1,
+               weight = 2) %>%
+  addLegend(pal = pal,
+            values = ~div[["Eh_a"]],
+            title = "mean Shannon's Equitability Index,<br> alpha (stand) level",
+            position = "bottomright") 
 ```
 <p class='capwrap'>
 Shannon's Eveness Index Plot  </p>
@@ -87,7 +158,11 @@ Shannon's Eveness Index Plot  </p>
 
 <div style="float:right;position:relative;top:10px;padding:5px 5px 5px 10px;margin:0px 5px 10px 5px">
 ```{r, echo = FALSE,  fig.height=5.75, fig.width= 5.75, fig.align = 'left', warning= FALSE, comment=FALSE, message=FALSE}
-ggplot()
+div_year %>%
+  ggplot(aes(x = MEASYEAR, y = Eh_a)) +
+  geom_point() + 
+  geom_line() +
+  facet_wrap(~SUBSECTION)
 ```
 <p class='capwrap'>
 Time series Plot  </p>
@@ -100,7 +175,26 @@ This text might describe the plots that relate to Shannon's Eveness Index, and m
 
 <div style="float:right;position:relative;top:10px;padding:5px 5px 5px 10px;margin:0px 5px 10px 5px">
 ```{r, echo = FALSE,  fig.height=5.75, fig.width= 5.75, fig.align = 'left', warning= FALSE, comment=FALSE, message=FALSE}
-ggplot()
+pal <- colorBin("Purples", domain = div[["S_a"]], bins = 9)
+
+div %>%
+  leaflet() %>%
+  addTiles() %>%
+  addPolygons(fillColor = ~ pal(div[["S_a"]]),
+              fillOpacity = 1,
+              opacity = 0,
+              popup = paste0("<b>Ecosubsection: </b>",
+                             div[["SUBSECTION"]],
+                             "<br> <b>mean Species Richness,<br> alpha (stand) level: </b>",
+                             round(div[["S_a"]], 3))) %>%
+  addPolylines(data = at_centerline,
+               color = "black",
+               opacity = 1,
+               weight = 2) %>%
+  addLegend(pal = pal,
+            values = ~div[["S_a"]],
+            title = "mean Species Richness,<br> alpha (stand) level",
+            position = "bottomright") 
 ```
 <p class='capwrap'>
 Species Richness Plot  </p>
@@ -108,7 +202,11 @@ Species Richness Plot  </p>
 
 <div style="float:right;position:relative;top:10px;padding:5px 5px 5px 10px;margin:0px 5px 10px 5px">
 ```{r, echo = FALSE,  fig.height=5.75, fig.width= 5.75, fig.align = 'left', warning= FALSE, comment=FALSE, message=FALSE}
-ggplot()
+div_year %>%
+  ggplot(aes(x = MEASYEAR, y = S_a)) +
+  geom_point() + 
+  geom_line() +
+  facet_wrap(~SUBSECTION)
 ```
 <p class='capwrap'>
 Time series Plot  </p>
@@ -116,11 +214,36 @@ Time series Plot  </p>
 
 This text might describe the plots that relate to Species Richness, and might also explain the species richness a bit more in depth. 
 
-### Tree Density and Biomass {.tabset }
+### Tree Density, Biomass, and Carbon {.tabset }
+
+```{r setup_cb, include = F}
+nb.cols <- 10
+mycolors <- colorRampPalette(brewer.pal(8, "Accent"))(nb.cols)
+```
+
 
 Text area describing metrics and patterns for density and biomass. 
 
-#### Means
+#### Tree Density {.tabset }
+
+##### Means
+
+<div style="float:right;position:relative;top:10px;padding:1px 1px 1px 1px;margin:0px 5px 10px 5px">
+```{r, echo=FALSE, fig.height=4, fig.width= 4, fig.align = 'left', message=FALSE}
+# Bar chart of mean species density and biomass per species by DBH class size for top 10 most abundant species
+```
+</div>
+
+<div style="float:left;position:relative;top:10px;padding:1px 1px 1px 1px;margin:0px 5px 10px 5px">
+```{r, echo=FALSE, fig.height=4, fig.width= 4, fig.align = 'right', message=FALSE}
+ggplot()
+# Time series plot showing top 5 species and Fraxinus density/biomass over time per ecoregion. It would be great to show all top 10 species but this could get a bit busy with 10 species X ecoregions). It may not be needed to show ecroregions.
+
+# It would be great to repeat the above plots for total biomass and carbon
+```
+</div>
+
+##### Totals
 
 <div style="float:right;position:relative;top:10px;padding:1px 1px 1px 1px;margin:0px 5px 10px 5px">
 ```{r, echo=FALSE, fig.height=4, fig.width= 4, fig.align = 'left', message=FALSE}
@@ -138,7 +261,39 @@ ggplot()
 ```
 </div>
 
-#### Totals
+#### Biomass {.tabset }
+
+##### Means
+
+<div style="float:right;position:relative;top:10px;padding:1px 1px 1px 1px;margin:0px 5px 10px 5px">
+```{r, echo=FALSE, fig.height=4, fig.width= 4, fig.align = 'left', message=FALSE}
+bio_top10 %>%
+  ggplot(aes(x = newClass,
+             y = BIO_ACRE,
+             fill = COMMON_NAME)) +
+  geom_col() +
+  theme_bw() +
+  scale_fill_manual(values = mycolors) +
+  theme(legend.position = "bottom")
+# Bar chart of mean species density and biomass per species by DBH class size for top 10 most abundant species
+```
+</div>
+
+<div style="float:left;position:relative;top:10px;padding:1px 1px 1px 1px;margin:0px 5px 10px 5px">
+```{r, echo=FALSE, fig.height=4, fig.width= 4, fig.align = 'right', message=FALSE}
+bio_year_top10 %>%
+  ggplot(aes(x = MEASYEAR, y = BIO_ACRE)) +
+  geom_point() +
+  geom_line() +
+  facet_wrap(~SCIENTIFIC_NAME) +
+  theme_bw()
+# Time series plot showing top 5 species and Fraxinus density/biomass over time per ecoregion. It would be great to show all top 10 species but this could get a bit busy with 10 species X ecoregions). It may not be needed to show ecroregions.
+
+# It would be great to repeat the above plots for total biomass and carbon
+```
+</div>
+
+##### Totals
 
 <div style="float:right;position:relative;top:10px;padding:1px 1px 1px 1px;margin:0px 5px 10px 5px">
 ```{r, echo=FALSE, fig.height=4, fig.width= 4, fig.align = 'left', message=FALSE}
@@ -155,6 +310,14 @@ ggplot()
 # It would be great to repeat the above plots for total biomass and carbon
 ```
 </div>
+
+
+#### Carbon {.tabset }
+
+##### Means
+
+##### Totals
+
 
 ### Tree Vital Rates {.tabset}
 
