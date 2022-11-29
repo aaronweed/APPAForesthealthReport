@@ -1,6 +1,6 @@
 # atForestReport
 
-This repository contains code used for the Appalachian Trail Project. Below is a quick overview of the files in this repository and their uses:
+This repository contains code used for the Appalachian Trail Project. Below is a quick overview of the files in this repository and their uses.
 
 ## Repo structure/files
 
