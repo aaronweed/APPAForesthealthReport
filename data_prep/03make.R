@@ -74,6 +74,30 @@ bio_year_top10 <- bio_year %>%
 saveRDS(bio_year_top10, "summary_data/bio_year_top10.rds")
 # ------------------------------------------------------------------------------
 
+
+# tpa_top10 --------------------------------------------------------------------
+tpa <- tpa(atMatch, polys = eco, treeDomain = DIA >= 5, nCores = 6,
+               bySpecies = TRUE, bySizeClass = TRUE, totals = TRUE)
+
+tpa$newClass <- makeClasses(tpa$sizeClass, interval = 5)
+
+tpa_top10 <- tpa %>%
+  filter(SCIENTIFIC_NAME %in% top10$SCIENTIFIC_NAME)
+
+saveRDS(tpa_top10, "summary_data/tpa_top10.rds")
+# ------------------------------------------------------------------------------
+
+
+# tpa_year_top10 ---------------------------------------------------------------
+tpa_year <- tpa(atMatch, treeDomain = DIA >= 5, nCores = 6,
+                    bySpecies = TRUE, totals = TRUE, grpBy = MEASYEAR)
+
+tpa_year_top10 <- tpa_year %>%
+  filter(SCIENTIFIC_NAME %in% top10$SCIENTIFIC_NAME)
+
+saveRDS(tpa_year_top10, "summary_data/tpa_year_top10.rds")
+# ------------------------------------------------------------------------------
+
 bio_year_top10 %>%
   ggplot(aes(x = MEASYEAR, y = BIO_ACRE)) +
   geom_point() +

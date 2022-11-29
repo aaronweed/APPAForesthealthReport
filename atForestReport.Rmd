@@ -35,7 +35,8 @@ div <- readRDS("summary_data/div.rds")
 div_year <- readRDS("summary_data/div_year.rds")
 bio_top10 <- readRDS("summary_data/bio_top10.rds")
 bio_year_top10 <- readRDS("summary_data/bio_year_top10.rds")
-
+tpa_top10 <- readRDS("summary_data/tpa_top10.rds")
+tpa_year_top10 <- readRDS("summary_data/tpa_year_top10.rds")
 ```
 
 `r params$region` Region{.tabset .tabset-fade .tabset-pills}
@@ -230,13 +231,32 @@ Text area describing metrics and patterns for density and biomass.
 
 <div style="float:right;position:relative;top:10px;padding:1px 1px 1px 1px;margin:0px 5px 10px 5px">
 ```{r, echo=FALSE, fig.height=4, fig.width= 4, fig.align = 'left', message=FALSE}
+tpa_top10 %>%
+  ggplot(aes(x = newClass,
+             y = TPA,
+             fill = SCIENTIFIC_NAME)) +
+  geom_col() +
+  theme_bw() +
+  scale_fill_manual(values = mycolors) +
+  theme(
+    legend.position = c(.999, .999),
+    legend.justification = c("right", "top"),
+    legend.box.just = "right",
+    legend.margin = margin(6, 6, 6, 6),
+    legend.key.height = unit(0.25, 'cm')
+    )
 # Bar chart of mean species density and biomass per species by DBH class size for top 10 most abundant species
 ```
 </div>
 
 <div style="float:left;position:relative;top:10px;padding:1px 1px 1px 1px;margin:0px 5px 10px 5px">
 ```{r, echo=FALSE, fig.height=4, fig.width= 4, fig.align = 'right', message=FALSE}
-ggplot()
+tpa_year_top10 %>%
+  ggplot(aes(x = MEASYEAR, y = TPA)) +
+  geom_point() +
+  geom_line() +
+  facet_wrap(~SCIENTIFIC_NAME) +
+  theme_bw()
 # Time series plot showing top 5 species and Fraxinus density/biomass over time per ecoregion. It would be great to show all top 10 species but this could get a bit busy with 10 species X ecoregions). It may not be needed to show ecroregions.
 
 # It would be great to repeat the above plots for total biomass and carbon
@@ -247,14 +267,32 @@ ggplot()
 
 <div style="float:right;position:relative;top:10px;padding:1px 1px 1px 1px;margin:0px 5px 10px 5px">
 ```{r, echo=FALSE, fig.height=4, fig.width= 4, fig.align = 'left', message=FALSE}
-ggplot()
+tpa_top10 %>%
+  ggplot(aes(x = newClass,
+             y = TREE_TOTAL,
+             fill = SCIENTIFIC_NAME)) +
+  geom_col() +
+  theme_bw() +
+  scale_fill_manual(values = mycolors) +
+  theme(
+    legend.position = c(.999, .999),
+    legend.justification = c("right", "top"),
+    legend.box.just = "right",
+    legend.margin = margin(6, 6, 6, 6),
+    legend.key.height = unit(0.25, 'cm')
+    )
 # Bar chart of mean species density and biomass per species by DBH class size for top 10 most abundant species
 ```
 </div>
 
 <div style="float:left;position:relative;top:10px;padding:1px 1px 1px 1px;margin:0px 5px 10px 5px">
 ```{r, echo=FALSE, fig.height=4, fig.width= 4, fig.align = 'right', message=FALSE}
-ggplot()
+tpa_year_top10 %>%
+  ggplot(aes(x = MEASYEAR, y = TREE_TOTAL)) +
+  geom_point() +
+  geom_line() +
+  facet_wrap(~SCIENTIFIC_NAME) +
+  theme_bw()
 # Time series plot showing top 5 species and Fraxinus density/biomass over time per ecoregion. It would be great to show all top 10 species but this could get a bit busy with 10 species X ecoregions). It may not be needed to show ecroregions.
 
 # It would be great to repeat the above plots for total biomass and carbon
@@ -270,11 +308,17 @@ ggplot()
 bio_top10 %>%
   ggplot(aes(x = newClass,
              y = BIO_ACRE,
-             fill = COMMON_NAME)) +
+             fill = SCIENTIFIC_NAME)) +
   geom_col() +
   theme_bw() +
   scale_fill_manual(values = mycolors) +
-  theme(legend.position = "bottom")
+  theme(
+    legend.position = c(.999, .999),
+    legend.justification = c("right", "top"),
+    legend.box.just = "right",
+    legend.margin = margin(6, 6, 6, 6),
+    legend.key.height = unit(0.25, 'cm')
+    )
 # Bar chart of mean species density and biomass per species by DBH class size for top 10 most abundant species
 ```
 </div>
@@ -297,14 +341,32 @@ bio_year_top10 %>%
 
 <div style="float:right;position:relative;top:10px;padding:1px 1px 1px 1px;margin:0px 5px 10px 5px">
 ```{r, echo=FALSE, fig.height=4, fig.width= 4, fig.align = 'left', message=FALSE}
-ggplot()
+bio_top10 %>%
+  ggplot(aes(x = newClass,
+             y = BIO_TOTAL,
+             fill = SCIENTIFIC_NAME)) +
+  geom_col() +
+  theme_bw() +
+  scale_fill_manual(values = mycolors) +
+  theme(
+    legend.position = c(.999, .999),
+    legend.justification = c("right", "top"),
+    legend.box.just = "right",
+    legend.margin = margin(6, 6, 6, 6),
+    legend.key.height = unit(0.25, 'cm')
+    )
 # Bar chart of mean species density and biomass per species by DBH class size for top 10 most abundant species
 ```
 </div>
 
 <div style="float:left;position:relative;top:10px;padding:1px 1px 1px 1px;margin:0px 5px 10px 5px">
 ```{r, echo=FALSE, fig.height=4, fig.width= 4, fig.align = 'right', message=FALSE}
-ggplot()
+bio_year_top10 %>%
+  ggplot(aes(x = MEASYEAR, y = BIO_TOTAL)) +
+  geom_point() +
+  geom_line() +
+  facet_wrap(~SCIENTIFIC_NAME) +
+  theme_bw()
 # Time series plot showing top 5 species and Fraxinus density/biomass over time per ecoregion. It would be great to show all top 10 species but this could get a bit busy with 10 species X ecoregions). It may not be needed to show ecroregions.
 
 # It would be great to repeat the above plots for total biomass and carbon
@@ -316,7 +378,75 @@ ggplot()
 
 ##### Means
 
+<div style="float:right;position:relative;top:10px;padding:1px 1px 1px 1px;margin:0px 5px 10px 5px">
+```{r, echo=FALSE, fig.height=4, fig.width= 4, fig.align = 'left', message=FALSE}
+bio_top10 %>%
+  ggplot(aes(x = newClass,
+             y = CARB_ACRE,
+             fill = SCIENTIFIC_NAME)) +
+  geom_col() +
+  theme_bw() +
+  scale_fill_manual(values = mycolors) +
+  theme(
+    legend.position = c(.999, .999),
+    legend.justification = c("right", "top"),
+    legend.box.just = "right",
+    legend.margin = margin(6, 6, 6, 6),
+    legend.key.height = unit(0.25, 'cm')
+    )
+# Bar chart of mean species density and biomass per species by DBH class size for top 10 most abundant species
+```
+</div>
+
+<div style="float:left;position:relative;top:10px;padding:1px 1px 1px 1px;margin:0px 5px 10px 5px">
+```{r, echo=FALSE, fig.height=4, fig.width= 4, fig.align = 'right', message=FALSE}
+bio_year_top10 %>%
+  ggplot(aes(x = MEASYEAR, y = CARB_ACRE)) +
+  geom_point() +
+  geom_line() +
+  facet_wrap(~SCIENTIFIC_NAME) +
+  theme_bw()
+# Time series plot showing top 5 species and Fraxinus density/biomass over time per ecoregion. It would be great to show all top 10 species but this could get a bit busy with 10 species X ecoregions). It may not be needed to show ecroregions.
+
+# It would be great to repeat the above plots for total biomass and carbon
+```
+</div>
+
 ##### Totals
+
+<div style="float:right;position:relative;top:10px;padding:1px 1px 1px 1px;margin:0px 5px 10px 5px">
+```{r, echo=FALSE, fig.height=4, fig.width= 4, fig.align = 'left', message=FALSE}
+bio_top10 %>%
+  ggplot(aes(x = newClass,
+             y = CARB_TOTAL,
+             fill = SCIENTIFIC_NAME)) +
+  geom_col() +
+  theme_bw() +
+  scale_fill_manual(values = mycolors) +
+  theme(
+    legend.position = c(.999, .999),
+    legend.justification = c("right", "top"),
+    legend.box.just = "right",
+    legend.margin = margin(6, 6, 6, 6),
+    legend.key.height = unit(0.25, 'cm')
+    )
+# Bar chart of mean species density and biomass per species by DBH class size for top 10 most abundant species
+```
+</div>
+
+<div style="float:left;position:relative;top:10px;padding:1px 1px 1px 1px;margin:0px 5px 10px 5px">
+```{r, echo=FALSE, fig.height=4, fig.width= 4, fig.align = 'right', message=FALSE}
+bio_year_top10 %>%
+  ggplot(aes(x = MEASYEAR, y = CARB_TOTAL)) +
+  geom_point() +
+  geom_line() +
+  facet_wrap(~SCIENTIFIC_NAME) +
+  theme_bw()
+# Time series plot showing top 5 species and Fraxinus density/biomass over time per ecoregion. It would be great to show all top 10 species but this could get a bit busy with 10 species X ecoregions). It may not be needed to show ecroregions.
+
+# It would be great to repeat the above plots for total biomass and carbon
+```
+</div>
 
 
 ### Tree Vital Rates {.tabset}
