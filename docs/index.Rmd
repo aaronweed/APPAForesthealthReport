@@ -4,8 +4,8 @@ output:
       fig_caption: true
       css: custom_styles.css
       includes: 
-        in_header: "../header_manual.html" 
-        after_body: "../footer.html"
+        in_header: "header_manual.html" 
+        after_body: "footer.html"
 params:
   region: Northeast
 ---
@@ -510,7 +510,7 @@ Text area describing DWD: volume and CWD:live tree volume
 A table like this one?
 
 ```{r, fig.align='center'}
-knitr::include_graphics("../dwd_table.png")
+knitr::include_graphics("dwd_table.png")
 ```
 
 
