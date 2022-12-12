@@ -37,6 +37,7 @@ bio_top10 <- readRDS("../summary_data/bio_top10.rds")
 bio_year_top10 <- readRDS("../summary_data/bio_year_top10.rds")
 tpa_top10 <- readRDS("../summary_data/tpa_top10.rds")
 tpa_year_top10 <- readRDS("../summary_data/tpa_year_top10.rds")
+
 ```
 
 `r params$region` Region{.tabset .tabset-fade .tabset-pills}
