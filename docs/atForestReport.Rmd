@@ -4,8 +4,8 @@ output:
       fig_caption: true
       css: custom_styles.css
       includes: 
-        in_header: "header_manual.html" 
-        after_body: "footer.html"
+        in_header: "../header_manual.html" 
+        after_body: "../footer.html"
 params:
   region: Northeast
 ---
@@ -29,14 +29,14 @@ library(RColorBrewer)
 library(sf)
 
 # Load data
-at_centerline <- readRDS("summary_data/at_centerline.rds")
-n_plots_per_ecosubsection <- readRDS("summary_data/n_plots_per_ecosubsection.rds")
-div <- readRDS("summary_data/div.rds")
-div_year <- readRDS("summary_data/div_year.rds")
-bio_top10 <- readRDS("summary_data/bio_top10.rds")
-bio_year_top10 <- readRDS("summary_data/bio_year_top10.rds")
-tpa_top10 <- readRDS("summary_data/tpa_top10.rds")
-tpa_year_top10 <- readRDS("summary_data/tpa_year_top10.rds")
+at_centerline <- readRDS("../summary_data/at_centerline.rds")
+n_plots_per_ecosubsection <- readRDS("../summary_data/n_plots_per_ecosubsection.rds")
+div <- readRDS("../summary_data/div.rds")
+div_year <- readRDS("../summary_data/div_year.rds")
+bio_top10 <- readRDS("../summary_data/bio_top10.rds")
+bio_year_top10 <- readRDS("../summary_data/bio_year_top10.rds")
+tpa_top10 <- readRDS("../summary_data/tpa_top10.rds")
+tpa_year_top10 <- readRDS("../summary_data/tpa_year_top10.rds")
 ```
 
 `r params$region` Region{.tabset .tabset-fade .tabset-pills}
@@ -510,7 +510,7 @@ Text area describing DWD: volume and CWD:live tree volume
 A table like this one?
 
 ```{r, fig.align='center'}
-knitr::include_graphics("dwd_table.png")
+knitr::include_graphics("../dwd_table.png")
 ```
 
 
