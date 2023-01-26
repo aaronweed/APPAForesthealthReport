@@ -37,7 +37,11 @@ bio_top10 <- readRDS("summary_data/bio_top10.rds")
 bio_year_top10 <- readRDS("summary_data/bio_year_top10.rds")
 tpa_top10 <- readRDS("summary_data/tpa_top10.rds")
 tpa_year_top10 <- readRDS("summary_data/tpa_year_top10.rds")
-
+mort <- readRDS("summary_data/mort.rds")
+mort_year <- readRDS("summary_data/mort_year.rds")
+mort_year_top10 <- readRDS("summary_data/mort_year_top10.rds")
+downwoody <- readRDS("summary_data/downwoody.rds")
+invasive <- readRDS("summary_data/invasive.rds")
 ```
 
 `r params$region` Region{.tabset .tabset-fade .tabset-pills}
@@ -456,12 +460,42 @@ Text area describing metrics and patterns of tree growth and mortality ( tree ba
 
 ```{r}
 # Bar chart showing mean annual growth per top 10 species across region of interest (NE in this example)
+mort_year_top10 %>%
+  ggplot(aes(x = MEASYEAR, y = GROW_TOTAL)) +
+  geom_col() +
+  facet_wrap(~SCIENTIFIC_NAME) +
+  theme_bw()
 
 # Similar map and bar charts for basal area and biomass growth
 
 # Tabular summary of mean annual mortality rates of top 10 species per ecoregion in area of interest (NE in this example)
+mort_year_top10 %>%
+  group_by(SCIENTIFIC_NAME) %>%
+  summarize(Average_Mortality_Percent = mean(MORT_PERC))
+
 
 # choropleth map for diameter growth rate (in/yr)
+pal <- colorBin("Purples", domain = mort[["MORT_TOTAL"]], bins = 9)
+
+mort %>%
+  leaflet() %>%
+  addTiles() %>%
+  addPolygons(fillColor = ~ pal(mort[["MORT_TOTAL"]]),
+              fillOpacity = 1,
+              opacity = 0,
+              popup = paste0("<b>Ecosubsection: </b>",
+                             mort[["SUBSECTION"]],
+                             "<br> <b>mean Shannon's Equitability Index,<br> alpha (stand) level: </b>",
+                             round(mort[["MORT_TOTAL"]], 3))) %>%
+  addPolylines(data = at_centerline,
+               color = "black",
+               opacity = 1,
+               weight = 2) %>%
+  addLegend(pal = pal,
+            values = ~mort[["MORT_TOTAL"]],
+            title = "mean Shannon's Equitability Index,<br> alpha (stand) level",
+            position = "bottomright") 
+  
 ```
 
 ### Regeneration
@@ -512,6 +546,16 @@ A table like this one?
 
 ```{r, fig.align='center'}
 knitr::include_graphics("dwd_table.png")
+
+downwoody %>%
+  group_by(SUBSECTION) %>%
+  summarize(
+    sum(nPlots_DWM),
+    sum(nPlots_AREA),
+    mean(VOL_ACRE),
+    mean(BIO_ACRE),
+    mean(CARB_ACRE)
+  )
 ```
 
 

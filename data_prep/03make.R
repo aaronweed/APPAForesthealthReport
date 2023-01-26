@@ -99,14 +99,34 @@ saveRDS(tpa_year_top10, "summary_data/tpa_year_top10.rds")
 # ------------------------------------------------------------------------------
 
 
-# growMort ---------------------------------------------------------------
-mort <- growMort(atMatch, treeDomain = DIA >= 5, nCores = 6,
+# growMort ---------------------------------------------------------------------
+mort <- growMort(atMatch, polys = eco, treeDomain = DIA >= 5, nCores = 6, totals = TRUE) %>%
+  left_join(n_plots_per_ecosubsection) %>% 
+  st_as_sf()
+
+mort_year <- growMort(atMatch, treeDomain = DIA >= 5, nCores = 6,
                 bySpecies = TRUE, totals = TRUE, grpBy = MEASYEAR)
 
-mort_year_top10 <- mort %>%
+mort_year_top10 <- mort_year %>%
   filter(SCIENTIFIC_NAME %in% top10$SCIENTIFIC_NAME)
 
-saveRDS(tpa_year_top10, "summary_data/tpa_year_top10.rds")
+saveRDS(mort, "summary_data/mort.rds")
+saveRDS(mort_year, "summary_data/mort_year.rds")
+saveRDS(mort_year_top10, "summary_data/mort_year_top10.rds")
+# ------------------------------------------------------------------------------
+
+
+# dwm --------------------------------------------------------------------------
+downwoody <- dwm(atMatch, polys = eco, nCores = 6, totals = TRUE)
+
+saveRDS(downwoody, "summary_data/downwoody.rds")
+# ------------------------------------------------------------------------------
+
+
+# invasive ---------------------------------------------------------------------
+invasive <- invasive(atMatch, polys = eco, nCores = 6, totals = TRUE)
+
+saveRDS(invasive, "summary_data/invasive.rds")
 # ------------------------------------------------------------------------------
 
 
