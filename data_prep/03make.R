@@ -1,5 +1,6 @@
 library(rFIA)
 library(tidyverse)
+library(sf)
 library(leaflet)
 eco <- rgdal::readOGR('ecoregions/', 'at_ecoSub')
 eco_sf <- sf::st_read("ecoregions/at_ecoSub.shp")
@@ -120,6 +121,19 @@ saveRDS(mort_year_top10, "summary_data/mort_year_top10.rds")
 downwoody <- dwm(atMatch, polys = eco, nCores = 6, totals = TRUE)
 
 saveRDS(downwoody, "summary_data/downwoody.rds")
+# ------------------------------------------------------------------------------
+
+# snags ------------------------------------------------------------------------
+
+snag <- tpa(atMatch, polys = eco, treeType = 'dead', treeDomain = DIA >= 5, nCores = 6) %>%
+  left_join(n_plots_per_ecosubsection) %>% 
+  st_as_sf()
+snagV <- biomass(atMatch, polys = eco, treeType = 'dead', treeDomain = DIA >= 5, nCores = 6) %>%
+  left_join(n_plots_per_ecosubsection) %>% 
+  st_as_sf()
+# snagLD <- tpa(atMatch, polys = eco, treeType = 'dead', treeDomain = DIA >= 11.81102, nCores = 6)
+# snagVLD <- biomass(atMatch, polys = eco, treeType = 'dead', treeDomain = DIA >= 11.81102, nCores = 6)
+
 # ------------------------------------------------------------------------------
 
 
