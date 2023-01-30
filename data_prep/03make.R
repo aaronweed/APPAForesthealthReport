@@ -133,7 +133,8 @@ snagV <- biomass(atMatch, polys = eco, treeType = 'dead', treeDomain = DIA >= 5,
   st_as_sf()
 # snagLD <- tpa(atMatch, polys = eco, treeType = 'dead', treeDomain = DIA >= 11.81102, nCores = 6)
 # snagVLD <- biomass(atMatch, polys = eco, treeType = 'dead', treeDomain = DIA >= 11.81102, nCores = 6)
-
+saveRDS(snag, "summary_data/snag.rds")
+saveRDS(snagV, "summary_data/snagV.rds")
 # ------------------------------------------------------------------------------
 
 

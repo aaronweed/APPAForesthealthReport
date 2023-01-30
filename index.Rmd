@@ -42,6 +42,8 @@ mort_year <- readRDS("summary_data/mort_year.rds")
 mort_year_top10 <- readRDS("summary_data/mort_year_top10.rds")
 downwoody <- readRDS("summary_data/downwoody.rds")
 invasive <- readRDS("summary_data/invasive.rds")
+snag <- readRDS("summary_data/snag.rds")
+snagV <- readRDS("summary_data/snagV.rds")
 ```
 
 `r params$region` Region{.tabset .tabset-fade .tabset-pills}
@@ -243,12 +245,18 @@ tpa_top10 %>%
   geom_col() +
   theme_bw() +
   scale_fill_manual(values = mycolors) +
+  labs(
+    x = "Size Class",
+    y = "Trees/acre",
+    fill = "Scientific Name"
+  ) +
   theme(
     legend.position = c(.999, .999),
     legend.justification = c("right", "top"),
     legend.box.just = "right",
     legend.margin = margin(6, 6, 6, 6),
-    legend.key.height = unit(0.25, 'cm')
+    legend.key.height = unit(0.25, 'cm'),
+    axis.text.x = element_text(angle = 90)
     )
 # Bar chart of mean species density and biomass per species by DBH class size for top 10 most abundant species
 ```
@@ -257,11 +265,16 @@ tpa_top10 %>%
 <div style="float:left;position:relative;top:10px;padding:1px 1px 1px 1px;margin:0px 5px 10px 5px">
 ```{r, echo=FALSE, fig.height=4, fig.width= 4, fig.align = 'right', message=FALSE}
 tpa_year_top10 %>%
+# mutate(MEASYEAR = stringr::str_sub(MEASYEAR, 3, 4)) %>%
   ggplot(aes(x = MEASYEAR, y = TPA)) +
   geom_point() +
   geom_line() +
+  labs(x = "Measurement Year",
+       y = "Trees/acre") +
   facet_wrap(~SCIENTIFIC_NAME) +
-  theme_bw()
+  theme_bw() +
+  theme(strip.text = element_text(size = 6),
+        axis.text.x = element_text(angle = 90))
 # Time series plot showing top 5 species and Fraxinus density/biomass over time per ecoregion. It would be great to show all top 10 species but this could get a bit busy with 10 species X ecoregions). It may not be needed to show ecroregions.
 
 # It would be great to repeat the above plots for total biomass and carbon
@@ -279,12 +292,16 @@ tpa_top10 %>%
   geom_col() +
   theme_bw() +
   scale_fill_manual(values = mycolors) +
+  labs(x = "Size Class",
+       y = "Total Trees",
+       fill = "Scientific Name") +
   theme(
     legend.position = c(.999, .999),
     legend.justification = c("right", "top"),
     legend.box.just = "right",
     legend.margin = margin(6, 6, 6, 6),
-    legend.key.height = unit(0.25, 'cm')
+    legend.key.height = unit(0.25, 'cm'),
+    axis.text.x = element_text(angle = 90)
     )
 # Bar chart of mean species density and biomass per species by DBH class size for top 10 most abundant species
 ```
@@ -296,8 +313,12 @@ tpa_year_top10 %>%
   ggplot(aes(x = MEASYEAR, y = TREE_TOTAL)) +
   geom_point() +
   geom_line() +
+  labs(x = "Measurement Year",
+       y = "Total Trees") +
   facet_wrap(~SCIENTIFIC_NAME) +
-  theme_bw()
+  theme_bw() +
+  theme(strip.text = element_text(size = 6),
+        axis.text.x = element_text(angle = 90))
 # Time series plot showing top 5 species and Fraxinus density/biomass over time per ecoregion. It would be great to show all top 10 species but this could get a bit busy with 10 species X ecoregions). It may not be needed to show ecroregions.
 
 # It would be great to repeat the above plots for total biomass and carbon
@@ -317,13 +338,17 @@ bio_top10 %>%
   geom_col() +
   theme_bw() +
   scale_fill_manual(values = mycolors) +
+  labs(x = "Size Class",
+       y = "Biomass/acre",
+       fill = "Scientific Name") +
   theme(
     legend.position = c(.999, .999),
     legend.justification = c("right", "top"),
     legend.box.just = "right",
     legend.margin = margin(6, 6, 6, 6),
-    legend.key.height = unit(0.25, 'cm')
-    )
+    legend.key.height = unit(0.25, 'cm'),
+    axis.text.x = element_text(angle = 90)
+    ) 
 # Bar chart of mean species density and biomass per species by DBH class size for top 10 most abundant species
 ```
 </div>
@@ -334,8 +359,12 @@ bio_year_top10 %>%
   ggplot(aes(x = MEASYEAR, y = BIO_ACRE)) +
   geom_point() +
   geom_line() +
+  labs(x = "Measurement Year",
+       y = "Biomass/acre") +
   facet_wrap(~SCIENTIFIC_NAME) +
-  theme_bw()
+  theme_bw() +
+  theme(strip.text = element_text(size = 6),
+        axis.text.x = element_text(angle = 90))
 # Time series plot showing top 5 species and Fraxinus density/biomass over time per ecoregion. It would be great to show all top 10 species but this could get a bit busy with 10 species X ecoregions). It may not be needed to show ecroregions.
 
 # It would be great to repeat the above plots for total biomass and carbon
@@ -352,13 +381,17 @@ bio_top10 %>%
              fill = SCIENTIFIC_NAME)) +
   geom_col() +
   theme_bw() +
+  labs(x = "Size class",
+       y = "Total biomass",
+       fill = "Scientific Name") +
   scale_fill_manual(values = mycolors) +
   theme(
     legend.position = c(.999, .999),
     legend.justification = c("right", "top"),
     legend.box.just = "right",
     legend.margin = margin(6, 6, 6, 6),
-    legend.key.height = unit(0.25, 'cm')
+    legend.key.height = unit(0.25, 'cm'),
+    axis.text.x = element_text(angle = 90)
     )
 # Bar chart of mean species density and biomass per species by DBH class size for top 10 most abundant species
 ```
@@ -370,8 +403,12 @@ bio_year_top10 %>%
   ggplot(aes(x = MEASYEAR, y = BIO_TOTAL)) +
   geom_point() +
   geom_line() +
+  labs(x = "Measurement Year",
+       y = "Total Biomass") +
   facet_wrap(~SCIENTIFIC_NAME) +
-  theme_bw()
+  theme_bw() +
+  theme(strip.text = element_text(size = 6),
+        axis.text.x = element_text(angle = 90))
 # Time series plot showing top 5 species and Fraxinus density/biomass over time per ecoregion. It would be great to show all top 10 species but this could get a bit busy with 10 species X ecoregions). It may not be needed to show ecroregions.
 
 # It would be great to repeat the above plots for total biomass and carbon
@@ -392,12 +429,16 @@ bio_top10 %>%
   geom_col() +
   theme_bw() +
   scale_fill_manual(values = mycolors) +
+  labs(x = "Size Class",
+       y = "Carbon/acre",
+       fill = "Scientific Name") +
   theme(
     legend.position = c(.999, .999),
     legend.justification = c("right", "top"),
     legend.box.just = "right",
     legend.margin = margin(6, 6, 6, 6),
-    legend.key.height = unit(0.25, 'cm')
+    legend.key.height = unit(0.25, 'cm'),
+    axis.text.x = element_text(angle = 90)
     )
 # Bar chart of mean species density and biomass per species by DBH class size for top 10 most abundant species
 ```
@@ -409,8 +450,12 @@ bio_year_top10 %>%
   ggplot(aes(x = MEASYEAR, y = CARB_ACRE)) +
   geom_point() +
   geom_line() +
+  labs(x = "Measurement Year",
+       y = "Carbon/acre") +
   facet_wrap(~SCIENTIFIC_NAME) +
-  theme_bw()
+  theme_bw() +
+  theme(strip.text = element_text(size = 6),
+        axis.text.x = element_text(angle = 90))
 # Time series plot showing top 5 species and Fraxinus density/biomass over time per ecoregion. It would be great to show all top 10 species but this could get a bit busy with 10 species X ecoregions). It may not be needed to show ecroregions.
 
 # It would be great to repeat the above plots for total biomass and carbon
@@ -428,12 +473,16 @@ bio_top10 %>%
   geom_col() +
   theme_bw() +
   scale_fill_manual(values = mycolors) +
+  labs(x = "Size class",
+       y = "Total carbon",
+       fill = "Scientific Name") +
   theme(
     legend.position = c(.999, .999),
     legend.justification = c("right", "top"),
     legend.box.just = "right",
     legend.margin = margin(6, 6, 6, 6),
-    legend.key.height = unit(0.25, 'cm')
+    legend.key.height = unit(0.25, 'cm'),
+    axis.text.x = element_text(angle = 90)
     )
 # Bar chart of mean species density and biomass per species by DBH class size for top 10 most abundant species
 ```
@@ -445,8 +494,12 @@ bio_year_top10 %>%
   ggplot(aes(x = MEASYEAR, y = CARB_TOTAL)) +
   geom_point() +
   geom_line() +
+  labs(x = "Measurement Year",
+       y = "Total carbon") +
   facet_wrap(~SCIENTIFIC_NAME) +
-  theme_bw()
+  theme_bw() +
+  theme(strip.text = element_text(size = 6),
+        axis.text.x = element_text(angle = 90))
 # Time series plot showing top 5 species and Fraxinus density/biomass over time per ecoregion. It would be great to show all top 10 species but this could get a bit busy with 10 species X ecoregions). It may not be needed to show ecroregions.
 
 # It would be great to repeat the above plots for total biomass and carbon
@@ -461,8 +514,10 @@ Text area describing metrics and patterns of tree growth and mortality ( tree ba
 ```{r}
 # Bar chart showing mean annual growth per top 10 species across region of interest (NE in this example)
 mort_year_top10 %>%
-  ggplot(aes(x = MEASYEAR, y = GROW_TOTAL)) +
+  ggplot(aes(x = MEASYEAR, y = GROW_PERC)) +
   geom_col() +
+  labs(x = "Measurement year",
+       y = "Mean annual growth (%)") +
   facet_wrap(~SCIENTIFIC_NAME) +
   theme_bw()
 
@@ -471,29 +526,31 @@ mort_year_top10 %>%
 # Tabular summary of mean annual mortality rates of top 10 species per ecoregion in area of interest (NE in this example)
 mort_year_top10 %>%
   group_by(SCIENTIFIC_NAME) %>%
-  summarize(Average_Mortality_Percent = mean(MORT_PERC))
+  summarize(`Average Mortality (%)` = mean(MORT_PERC)) %>%
+  rename(`Scientific Name` = SCIENTIFIC_NAME) %>%
+  kable()
 
 
 # choropleth map for diameter growth rate (in/yr)
-pal <- colorBin("Purples", domain = mort[["MORT_TOTAL"]], bins = 9)
+pal <- colorBin("Purples", domain = mort[["GROW_PERC"]], bins = 8)
 
 mort %>%
   leaflet() %>%
   addTiles() %>%
-  addPolygons(fillColor = ~ pal(mort[["MORT_TOTAL"]]),
+  addPolygons(fillColor = ~ pal(mort[["GROW_PERC"]]),
               fillOpacity = 1,
               opacity = 0,
               popup = paste0("<b>Ecosubsection: </b>",
                              mort[["SUBSECTION"]],
-                             "<br> <b>mean Shannon's Equitability Index,<br> alpha (stand) level: </b>",
-                             round(mort[["MORT_TOTAL"]], 3))) %>%
+                             "<br> <b>mean annual growth on survivors (%): </b>",
+                             round(mort[["GROW_PERC"]], 3))) %>%
   addPolylines(data = at_centerline,
                color = "black",
                opacity = 1,
                weight = 2) %>%
   addLegend(pal = pal,
-            values = ~mort[["MORT_TOTAL"]],
-            title = "mean Shannon's Equitability Index,<br> alpha (stand) level",
+            values = ~mort[["GROW_PERC"]],
+            title = "mean annual growth on survivors (%)",
             position = "bottomright") 
   
 ```
@@ -555,7 +612,8 @@ downwoody %>%
     mean(VOL_ACRE),
     mean(BIO_ACRE),
     mean(CARB_ACRE)
-  )
+  ) %>%
+  kable()
 ```
 
 
