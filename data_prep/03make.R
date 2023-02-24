@@ -4,8 +4,8 @@ library(sf)
 library(leaflet)
 eco <- rgdal::readOGR('ecoregions/', 'at_ecoSub')
 eco_sf <- sf::st_read("ecoregions/at_ecoSub.shp")
-atMatch <- readRDS("data_prep/atMatch.rds")
-
+atMatch <- readRDS("data_prep/atMatch.rds") # all inventories 
+atMatch_MR <- readRDS("data_prep/atMatch_MR.rds")# most recent inventory
 
 # n_plots_per_ecosubsection ----------------------------------------------------
 plt <- rFIA::biomass(atMatch, byPlot = TRUE, grpBy = ECOSUBCD) %>%
@@ -50,7 +50,8 @@ saveRDS(div_year, "summary_data/div_year.rds")
 # bio_top10 --------------------------------------------------------------------
 bio <- biomass(atMatch, polys = eco, treeDomain = DIA >= 5, nCores = 6,
            bySpecies = TRUE, bySizeClass = TRUE, totals = TRUE)
-top10 <- bio %>%
+
+top10 <- bio %>% 
   group_by(SCIENTIFIC_NAME) %>%
   summarize(n = n()) %>%
   arrange(desc(n)) %>%
@@ -66,7 +67,7 @@ saveRDS(bio_top10, "summary_data/bio_top10.rds")
 
 
 # bio_year_top10 ---------------------------------------------------------------
-bio_year <- biomass(atMatch, treeDomain = DIA >= 5, nCores = 6,
+bio_year <- biomass(atMatch, polys = eco, treeDomain = DIA >= 5, nCores = 6,
                bySpecies = TRUE, totals = TRUE, grpBy = MEASYEAR)
 
 bio_year_top10 <- bio_year %>%
@@ -76,9 +77,14 @@ saveRDS(bio_year_top10, "summary_data/bio_year_top10.rds")
 # ------------------------------------------------------------------------------
 
 
-# tpa_top10 --------------------------------------------------------------------
-tpa <- tpa(atMatch, polys = eco, treeDomain = DIA >= 5, nCores = 6,
-               bySpecies = TRUE, bySizeClass = TRUE, totals = TRUE)
+# Trees Per Acre --------------------------------------------------------------------
+# From most recent inventory
+tpa_All <- tpa(atMatch_MR, polys = eco_sf, treeDomain = DIA >= 5, nCores = 6, treeType = "live",
+               totals = TRUE, returnSpatial= FALSE) %>% # All species
+              st_as_sf() 
+
+tpa <- tpa(atMatch_MR, polys = eco, treeDomain = DIA >= 5, nCores = 6, treeType = "live",
+               bySpecies = TRUE, bySizeClass = TRUE, totals = TRUE, returnSpatial= TRUE)
 
 tpa$newClass <- makeClasses(tpa$sizeClass, interval = 5)
 
@@ -90,8 +96,8 @@ saveRDS(tpa_top10, "summary_data/tpa_top10.rds")
 
 
 # tpa_year_top10 ---------------------------------------------------------------
-tpa_year <- tpa(atMatch, treeDomain = DIA >= 5, nCores = 6,
-                    bySpecies = TRUE, totals = TRUE, grpBy = MEASYEAR)
+tpa_year <- tpa(atMatch, polys = eco,treeDomain = DIA >= 5, nCores = 6, treeType = "live",
+                    bySpecies = TRUE, totals = TRUE, grpBy = MEASYEAR, returnSpatial= TRUE)
 
 tpa_year_top10 <- tpa_year %>%
   filter(SCIENTIFIC_NAME %in% top10$SCIENTIFIC_NAME)
