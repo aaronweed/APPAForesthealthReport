@@ -7,7 +7,8 @@ output:
         in_header: "header_manual.html" 
         after_body: "footer.html"
 params:
-  region: Northeast
+  section: White Mountains
+  
 ---
       
 ```{r setup, include=FALSE}
@@ -16,6 +17,7 @@ knitr::opts_chunk$set(echo = FALSE)
 library(magrittr)
 library(devtools)
 library(tidyverse)
+library(ggpattern)
 library(NCRNbirds)
 library(leaflet)
 library(cowplot)
@@ -27,50 +29,86 @@ library(kableExtra)
 library(formattable)
 library(RColorBrewer)
 library(sf)
+library(knitr)
+library(kableExtra)
+library(rFIA)
 
 # Load data
-at_centerline <- readRDS("summary_data/at_centerline.rds")
-n_plots_per_ecosubsection <- readRDS("summary_data/n_plots_per_ecosubsection.rds")
+at_centerline <- readRDS("summary_data/at_centerline.rds") # AT centerline shapefile
+n_plots_per_ecosubsection <- readRDS("summary_data/n_plots_per_ecosubsection.rds") # shapefile with number of FIA plots per region
+
+plt_loc<-readRDS("summary_data/plt_loc.rds")# points layer of plot locations
+
+objs<-read.csv("objs.csv") %>%  rename(`Monitoring Objectives`= Monitoring.Objectives)#import monitoring objs table
+
+centroids<- readRDS("summary_data/centroids.rds")# center points of Ecological Section for SetView
+
+elevs_yr<- readRDS("summary_data/elevs_yr.rds")# elevation of plots
+
+samp_years<-elevs_yr %>% filter(SECTION_NA %in% params$section) %>% # filter data by Section
+  ungroup() %>% 
+  summarise(min= min(YEAR), max= max(YEAR)) #find first and last years of sampling
+
 div <- readRDS("summary_data/div.rds")
 div_year <- readRDS("summary_data/div_year.rds")
-bio_top10 <- readRDS("summary_data/bio_top10.rds")
-bio_year_top10 <- readRDS("summary_data/bio_year_top10.rds")
-tpa_top10 <- readRDS("summary_data/tpa_top10.rds")
-tpa_year_top10 <- readRDS("summary_data/tpa_year_top10.rds")
-mort <- readRDS("summary_data/mort.rds")
-mort_year <- readRDS("summary_data/mort_year.rds")
-mort_year_top10 <- readRDS("summary_data/mort_year_top10.rds")
+
+ss <-readRDS("summary_data/ss.rds") # Stand Structure
+
+snag <- readRDS("summary_data/snag.rds") # Snag density trees >5"DBH
+snagV <- readRDS("summary_data/snagV.rds") # Snag volume trees >5"DBH
+
 downwoody <- readRDS("summary_data/downwoody.rds")
-invasive <- readRDS("summary_data/invasive.rds")
-snag <- readRDS("summary_data/snag.rds")
-snagV <- readRDS("summary_data/snagV.rds")
+
+tpa_year_top10 <- readRDS("summary_data/tpa_year_top10.rds") # density of of top10 most abundant species per year
+all_tpa <-readRDS("summary_data/all_tpa.rds") # density of live and standing dead trees
+tpa_live<-readRDS("summary_data/tpa_live.rds") # density of live trees (>5" DBH)
+tpa_Spp<- readRDS("summary_data/tpa_Spp.rds") # density of tree species by species
+tpa_Spp_SizeCl<- readRDS("summary_data/tpa_Spp_SizeCl.rds") # density of tree species by species and size class
+
+live_bio <- readRDS("summary_data/biomass.rds") # live tree biomass
+live_vol<- readRDS("summary_data/live_vol.rds") # live tree volume
+
+saplings<-readRDS("summary_data/saplings.rds") %>% add_column(variable = "Saplings (1-5 in. DBH)")
+saplings_Spp<-readRDS("summary_data/saplings_Spp.rds") %>% add_column(variable = "Saplings (1-5 in. DBH)")
+
+seedlings<-readRDS("summary_data/seedlings.rds") %>% add_column(variable = "Seedlings (<1 in. DBH)")
+seedlingsSpp<-readRDS("summary_data/seedlingsSp.rds") %>% add_column(variable = "Seedlings(<1 in. DBH)")
+
+mort <- readRDS("summary_data/mort.rds") # mortality rates by Species
+growth<- readRDS("summary_data/growth.rds") # DBH growth rates by Species
+
+invasives <- readRDS("summary_data/invasive.rds")
 
 ```
 
-`r params$region` Region{.tabset .tabset-fade .tabset-pills}
+`r paste0(params$section," Ecological Section")` {.tabset .tabset-fade .tabset-pills}
 ------------------------------------
-### Overview {.tabset}
-#### Background
-<div style="float:right;position:relative;top:10px;padding:5px 5px 5px 10px;margin:0px 5px 10px 5px">
-```{r, echo = FALSE,  fig.height=5.75, fig.width= 5.75, fig.align = 'left', warning= FALSE, comment=FALSE, message=FALSE,}
-# Map of AT with HUC10 Shell and AT center line zoomed into selected subregion (NE) showing number of FIA plots per ecoregion as chloropleth. 
+### Overview {.tabset }
 
+<div style="float:right;position:relative;top:10px;padding:5px 5px 5px 10px;margin:0px 5px 10px 5px">
+```{r, echo = FALSE, g.height=5.75, fig.width= 5.75, fig.align = 'left', warning= FALSE, comment=FALSE, message=FALSE}
+# Map of AT with HUC10 Shell and AT center line zoomed into selected subregion (NE) showing number of FIA plots per ecoregion as chloropleth. 
 pal <- colorBin("Oranges", domain = n_plots_per_ecosubsection[["n_plots"]], bins = 5, na.color = NA )
 
-n_plots_per_ecosubsection %>%
+n_plots_per_ecosubsection<- n_plots_per_ecosubsection %>% 
+  filter(SECTION_NA %in% params$section)
+
+n_plots_per_ecosubsection %>% 
   leaflet() %>%
-  #setView(lng = -71.0589, lat = 42.3601, zoom = 12) %>%  
+  setView(lng= centroids[centroids$SECTION_NA == params$section,]$X, lat=centroids[centroids$SECTION_NA == params$section,]$Y, zoom=7) %>%  
   addTiles() %>%
   addPolygons(fillColor = ~ pal(n_plots_per_ecosubsection[["n_plots"]]),
               fillOpacity = 1,
-              opacity = 0,
-              stroke= TRUE, weight = 1,
+              opacity = 1,
+              stroke= TRUE, weight = 1, color = "blue",
               popup = paste0("<b>Ecological Section: </b>",
                              n_plots_per_ecosubsection[["SECTION_NA"]],
                              "<br> <b>SubSection: </b>",
                              n_plots_per_ecosubsection[["SUBSECTI_1"]],
                              "<br> <b>Number of FIA Plots: </b>",
                              n_plots_per_ecosubsection[["n_plots"]])) %>%
+  # addCircleMarkers(data = filter(plt_loc,SECTION_NA %in% params$section), color = "black", 
+  #                  radius = .5) %>% 
   addPolylines(data = at_centerline,
                color = "black",
                opacity = 1,
@@ -78,453 +116,415 @@ n_plots_per_ecosubsection %>%
   addLegend(pal = pal,
             values = ~n_plots_per_ecosubsection[["n_plots"]],
             title = "Number of FIA Plots",
-            position = "bottomright", bins= 5, na.label = "") 
+            position = "bottomright", bins= 5, na.label = "")
+
 ```
 <p class='capwrap'>
-Map of Appalachian Trail HUC10 Shell and AT center line showing number of FIA plots per Ecoregional SubSections following Cleland et al. (2007). Clicking on the subsection will display the number of FIA plots used to summarize forest health condition.  </p>
+Map of Appalachian Trail HUC10 Shell and AT center line showing number of FIA plots per Ecoregional SubSections (Cleland et al. 2007). Clicking on the subsection will display the number of FIA plots used to summarize forest health condition.  </p>
 </div>
 
-<h3> Vital Signs Monitoring along the Appalachian Scenic</h3>
+<h3> Forest Health Monitoring along the Appalachian Scenic Trail</h3>
 
-<p> The Appalachian National Scenic Trail (APPA) traverses more than 2,170 miles across the highest ridgelines of the Appalachian Mountains, from Georgia to Maine. Along the way it crosses through 14 states, eight National Forests, six National Parks, six Inventory and Monitoring networks, a National Wildlife Refuge, three Tennessee Valley Authority properties, one Smithsonian Institute property, and over 280 local jurisdictions. The Trail is managed in partnership with the Appalachian Trail Conservancy (ATC) and its 30 affiliated Trail-maintaining clubs under an extraordinary cooperative management system.
+<p> The Appalachian National Scenic Trail (APPA) traverses more than 2,170 miles across the highest ridgelines of the Appalachian Mountains, from Georgia to Maine. The region through which APPA passes is predominantly forested and key stressors of these resources include land use change and habitat fragmentation, nonnative species, visitor usage, wet and dry deposition, and climate change. In order to monitor the status and trends of APPA's forest resources NETN developed a data acquisition protocol (Dieffenbach 2018) to summarize plot-based data collected by the Forest Inventory and Analysis (FIA) Program at the ecological subsection scale (Dieffenbach 2018). This report summarizes FIA data collected within the `r params$subsection` ecological subsection surrounding the Trail within the HUC10 shell. </p>
 
-The Appalachian Trail is uniquely situated to serve as a barometer for the air, water, and biological diversity of the Appalachian Mountains and much of the eastern United States. The trail’s length, north-south alignment, changes in elevation, and numerous peaks and ridges it crosses  creates one of the most biodiverse units of the National Park System. The Appalachian Trail is monitored through the North East Temperate Inventory and Monitoring Network’s (NETN) Vital Sign Monitoring Program (Dieffenbach 2011). The goals of the monitoring program are:
+<h3> Monitoring Objectives </h3>
 
-<ul>
-<li> to summarize the status and trends of park ecosystem vital signs to allow managers to make better-informed decisions, and
-<li> to provide early warning of abnormal conditions of monitored resources to help develop effective mitigation measures.
-</ul>
+<p>In cooperation with Michigan State University, NETN leverages the USFS's Forest Inventory and Analysis database to assess the status and trends in forest condition along the Appalachian Trail and neighboring lands. Specifically, FIA data are compiled across 14 states for every available year and then data are extracted from plot locations falling within APPA's HUC10 Shell (Dieffenbach 2018). Forest inventory data are then summarized using the R package rFIA (Stanke and Finley 2020) into distinct ecological subsections along the Trail (Cleland et al. 2007) following the methods of Dieffenbach (2018) and Stanke et al. (2020). FIA data are used to calculate the following metrics at each ecoregional subsection: 
+</p>
 
-#### Forest Health Monitoring Objectives
+```{r objs, echo=FALSE, warning= FALSE, comment=FALSE, message=FALSE}
 
-<p>The region through which APPA passes is predominantly forested and key stressors of these resources include land use change and habitat fragmentation on lands adjacent to the Appalachian NST corridor, nonnative species, visitor usage, wet and dry deposition, and climate change. The large, but narrow configuration of the APPA makes a ground-based plot monitoring program logistically and financially infeasible for the National Park Service to implement. In light of that challenge, NETN developed a data acquisition protocol (Dieffenbach 2018) to track the overall condition of forest resources along the Appalachian Trail using plot-based data collected by the Forest Inventory and Analysis (FIA) Program.</p>
 
-<div style="float:right;position:relative;top:10px;padding:5px 5px 5px 10px;margin:0px 5px 10px 5px">
-```{r objs, fig.align='left',fig.height=5.75, fig.width= 5.75}
-knitr::include_graphics("objectives_table.png")
+kableExtra::kbl(objs, escape = FALSE, align= "l", longtable= T) %>% 
+  kable_styling(fixed_thead = TRUE, bootstrap_options = c("striped", "hover", "condensed", "responsive"),position = "left")
+
 ```
-<p class='capwrap'>
-Appalachian National Scenic Trail Forest Monitoring Protocol objectives . All objectives will evaluate variation in metrics across plots and ecoregional subsections of the Appalachian NST within the HUC10 Shell.</p>
-</div>
-
-#### Methods
-
-<p>In cooperation with Michigan State University, NETN leverages the USFS's Forest Inventory and Analysis database to assess the status and trends in forest condition along the Appalachian Trail and neighboring lands (Stanke et al. 2020). Specifically, FIA data is compiled across 14 states for every available year of data and then data are extracted from plot locations falling within  APPA's HUC10 Shell.Forest inventory data is then summarized following the methods of Stanke et al. (2020) into distinct ecological subsections along  the Trail (Cleland et al. 2007; Dieffenbach 2018). The R package <b> rFIA </b> is used to compile the data and calculate the following metrics at each ecoregional subsection: </p>
-<ul>
-<li> <b>Stand structural stage:</b> Percentage of Area in Pole, Mature, and Late Stage forest
-<li> <b>Forest Demographics:</b> Annual Recruitment, Mortality, and Harvest
-<li> <b>Tree abundance and Biomass: </b> Trees per Acre (TPA), Basal Area (BAA), Biomass, and Carbon
-<li> <b>Tree diversity:</b> Richness, Shannon’s diversity, and Evenness 
-<li> <b>Tree vital rates:</b> Annual Diameter, Basal Area, and Biomass growth
-<li> <b>Regeneration:</b> Regeneration Density (<5” DBH)
-<li> <b>Snags:</b> Dead Tree TPA, BAA, Biomass, Carbon, and Relative Fraction
-<li> <b>Down Woody Debris:</b> Volume, Biomass, and Carbon
-<li> <b>Invasive Plants (where possible):</b> Percent Cover
-</ul>
 
 For more specific details about the methods used to calculate the forest metrics above please consult Stanke et al. (2020) or NETN's protocol (Dieffenbach 2018).
 
 
+#### Methods 
 
-<div style="float:right;position:relative;top:10px;padding:5px 5px 5px 10px;margin:0px 5px 10px 5px">
-```{r methods, fig.align='left'}
-knitr::include_graphics("rFIA logo.png")
-```
-</div>
+``` {r elev,echo=FALSE, warning= FALSE, comment=FALSE, message=FALSE}
 
-### Structural Stage Distribution {.tabset }
-
-We used rFIA to estimate forest structural stage distributions, with associated sampling errors, within ecoregion subsections which surround the Appalachian National Scenic Trail. We produced estimates for each FIA reporting year which was common among all states included in the analysis (2005-2016, with the exception of 2008).
-
-Insert map like https://rfia.netlify.app/at/ss/ showing data from last inventory.
-
-
-### Species Diversity {.tabset }
-
-<p>  We used rFIA to estimate average species diversity indices for live trees (DBH >= 12.7cm) at alpha, beta, and gamma levels, with associated sampling errors, within ecoregion subsections which surround the Appalachian National Scenic Trail. We produced estimates for each FIA reporting year which was common among all states included in the analysis (2005-2016, with the exception of 2008). </p> 
-
-#### Species Richness
-
-<div style="float:right;position:relative;top:10px;padding:5px 5px 5px 10px;margin:0px 5px 10px 5px">
-```{r, echo = FALSE,  fig.height=5.75, fig.width= 5.75, fig.align = 'left', warning= FALSE, comment=FALSE, message=FALSE}
-pal <- colorBin("Purples", domain = div[["S_a"]], bins = 5)
-
-div %>%
-  leaflet() %>%
-  addTiles() %>%
-  addPolygons(fillColor = ~ pal(div[["S_a"]]),
-              fillOpacity = 1,
-              opacity = 0,
-              popup = paste0("<b>Ecological Section: </b>",
-                             div[["SECTION_NA"]],
-                             "<br> <b>SubSection: </b>",
-                             div[["SUBSECTI_1"]],
-                             "<br> <b>Avg. Species Richness,<br> (stand) level: </b>",
-                             round(div[["S_a"]], 1))) %>%
-  addPolylines(data = at_centerline,
-               color = "black",
-               opacity = 1,
-               weight = 2) %>%
-  addLegend(pal = pal,
-            values = ~div[["S_a"]],
-            title = "Avg. Species Richness,<br> (stand) level",
-            position = "bottomright", bins= 5, na.label = "") 
-```
-<p class='capwrap'>
-Species Richness Plot  </p>
-</div>
-
-<div style="float:right;position:relative;top:10px;padding:5px 5px 5px 10px;margin:0px 5px 10px 5px">
-```{r, echo = FALSE,  fig.height=14, fig.width= 10, fig.align = 'left', warning= FALSE, comment=FALSE, message=FALSE}
-div_year %>%
+elevs_yr %>%
+  select(pltID, SECTION_NA, SUBSECTI_1, ELEV) %>%  group_by(SECTION_NA, SUBSECTI_1,pltID) %>%
+  distinct() %>% 
+  filter(SECTION_NA %in% params$section) %>% # filter out data by Section scale
   group_by(SUBSECTI_1) %>% 
-  ggplot(aes(x = MEASYEAR, y = S_a, color = SUBSECTI_1 )) +
-  geom_point()+geom_line()+
-  theme_bw()+
-  facet_wrap(~SECTION_NA, nrow= 6, scales = "free_y")+
-  scale_color_viridis_d()+
-  theme(legend.position = "bottom")+
-  labs(y=" Species Richness" ,x= "Year", color = "")
+  summarise(`No. FIA plots`= n(), `Average Elevation (ft)`= mean(ELEV), `Elevation Range (ft)` = paste0(min(ELEV)," - ", max(ELEV))) %>% 
+   select(`Ecol. Subsection` = SUBSECTI_1, `No. FIA plots`, `Average Elevation (ft)`, `Elevation Range (ft)`) %>% 
+  kableExtra::kbl(.,digits = 1, escape = FALSE, align= c("l", "c","c","c"), longtable= T, caption= paste0("Total number and elevation of FIA plots in each subsection sampled between ",samp_years$min, " - ",samp_years$max,"." )) %>%
+  kable_styling(fixed_thead = TRUE, bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
 ```
-<p class='capwrap'>
-Time series Plot  </p>
-</div>
 
-This text might describe the plots that relate to Species Richness, and might also explain the species richness a bit more in depth. 
+``` {r elev_yr,echo=FALSE, warning= FALSE, comment=FALSE, message=FALSE}
 
-#### Shannon’s Diversity Index
+elevs_yr %>% filter(SECTION_NA %in% params$section) %>% # filter out data by Section scale
+  group_by(SUBSECTI_1, YEAR) %>% 
+  summarise(`No. FIA plots`= n(), `Average Elevation (ft)`= mean(ELEV), `Elevation Range (ft)` = paste0(min(ELEV)," - ", max(ELEV))) %>% 
+  select(`Ecol. Subsection` = SUBSECTI_1, Year= YEAR,`No. FIA plots`, `Average Elevation (ft)`, `Elevation Range (ft)`) %>% 
+  kableExtra::kbl(.,digits = 1, escape = FALSE, align= c("l", "c","c","c","c"), longtable= T, caption= paste0("Total number and elevation of FIA plots in each subsection sampled each year.")) %>% collapse_rows(.,columns = 1, valign = "top") %>% 
+  kable_styling(fixed_thead = TRUE, bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 
-<div style="float:right;position:relative;top:10px;padding:5px 5px 5px 10px;margin:0px 5px 10px 5px">
-```{r, echo = FALSE,  fig.height=5.75, fig.width= 5.75, fig.align = 'left', warning= FALSE, comment=FALSE, message=FALSE}
-pal <- colorBin("Purples", domain = div[["H_a"]], bins = 5)
 
-div %>%
-  leaflet() %>%
-  addTiles() %>%
-  addPolygons(fillColor = ~ pal(div[["H_a"]]),
-              fillOpacity = 1,
-              opacity = 0,
-              popup = paste0("<b>Ecological Section: </b>",
-                             div[["SECTION_NA"]],
-                             "<br> <b>SubSection: </b>",
-                             div[["SUBSECTI_1"]],
-                             "<br> <b>mean Shannon's Diversity Index,<br> alpha (stand) level: </b>",
-                             round(div[["H_a"]], 1))) %>%
-  addPolylines(data = at_centerline,
-               color = "black",
-               opacity = 1,
-               weight = 2) %>%
-  addLegend(pal = pal,
-            values = ~div[["H_a"]],
-            title = "mean Shannon's Diversity Index,<br> alpha (stand) level",
-            position = "bottomright",bins= 5, na.label = "") 
 ```
-<p class='capwrap'>
-Shannon's Diversity Index Plot  </p>
-</div>
 
-<div style="float:right;position:relative;top:10px;padding:5px 5px 5px 10px;margin:0px 5px 10px 5px">
-```{r, echo = FALSE,  fig.height=5.75, fig.width= 5.75, fig.align = 'left', warning= FALSE, comment=FALSE, message=FALSE}
-div_year %>%
-  ggplot(aes(x = MEASYEAR, y = H_a)) +
-  geom_point() + 
-  geom_line() +
-  facet_wrap(~SUBSECTION)
-```
-<p class='capwrap'>
-Time series Plot  </p>
-</div>
+### Stand Structure {.tabset }
 
-This text might describe the plots that relate to Shannon's Diversity Index, and might also explain the index a bit more in depth. 
+#### Stand Structural Class 
 
-#### Shannon’s Evenness Index
+Structural stage distribution is calculated from tree size and canopy position measurements, using a method similar to that of Frelich and Lorimer (1991), but substituting basal area for exposed crown area (Goodell and Faber-Langendoen 2007). Plots are classified as pole, mature, or late-successional based on relative basal area of live canopy trees within pole, mature and large size classes.
 
-<div style="float:right;position:relative;top:10px;padding:5px 5px 5px 10px;margin:0px 5px 10px 5px">
-```{r, echo = FALSE,  fig.height=5.75, fig.width= 5.75, fig.align = 'left', warning= FALSE, comment=FALSE, message=FALSE}
-pal <- colorBin("Purples", domain = div[["Eh_a"]], bins = 5)
+``` {r SS_plot, echo=FALSE, fig.height=6, fig.width= 12, fig.align = 'center', message=FALSE, fig.cap= "Proportion of plots in each structural stage (Late-Succession, Mature, and Pole) and field stand structure class (Mosaic) per ecological subsection based on the most recent FIA inventory. Structural stages are based on the proportion of basal area by size class."}
 
-div %>%
-  leaflet() %>%
-  addTiles() %>%
-  addPolygons(fillColor = ~ pal(div[["Eh_a"]]),
-              fillOpacity = 1,
-              opacity = 0,
-              popup = paste0("<b>Ecological Section: </b>",
-                             div[["SECTION_NA"]],
-                             "<br> <b>SubSection: </b>",
-                             div[["SUBSECTI_1"]],
-                             "<br> <b>mean Shannon's Equitability Index,<br> alpha (stand) level: </b>",
-                             round(div[["Eh_a"]], 3))) %>%
-  addPolylines(data = at_centerline,
-               color = "black",
-               opacity = 1,
-               weight = 2) %>%
-  addLegend(pal = pal,
-            values = ~div[["Eh_a"]],
-            title = "mean Shannon's Equitability Index,<br> alpha (stand) level",
-            position = "bottomright",bins= 5, na.label = "") 
-```
-<p class='capwrap'>
-Shannon's Eveness Index Plot  </p>
-</div>
+ss %>% 
+  filter(SECTION_NA %in% params$section) %>% 
+  ggplot(aes(x = fct_rev(SUBSECTI_1), y = COVER_PCT, fill= stringr::str_to_sentence(STAGE))) +
+  geom_bar(stat= "identity")+
+   scale_fill_viridis_d()+
+  theme_classic() +
+  coord_flip()+
+  labs(x = "",  y = "Average Percent Cover", fill = "Stage") +
+  theme(legend.position = "right", legend.text= element_text(size = 14),legend.title= element_text(size = 14), axis.text = element_text(size = 14), axis.title = element_text(size = 14))
 
-<div style="float:right;position:relative;top:10px;padding:5px 5px 5px 10px;margin:0px 5px 10px 5px">
-```{r, echo = FALSE,  fig.height=5.75, fig.width= 5.75, fig.align = 'left', warning= FALSE, comment=FALSE, message=FALSE}
-div_year %>%
-  ggplot(aes(x = MEASYEAR, y = Eh_a)) +
-  geom_point() + 
-  geom_line() +
-  facet_wrap(~SUBSECTION)
-```
-<p class='capwrap'>
-Time series Plot  </p>
-</div>
-
-This text might describe the plots that relate to Shannon's Eveness Index, and might also explain the index a bit more in depth. 
-
-### Tree Density and Carbon {.tabset }
-
-```{r setup_cb, include = F}
-nb.cols <- 10
-mycolors <- colorRampPalette(brewer.pal(8, "Accent"))(nb.cols)
 ```
 
 
-We used rFIA to estimate average abundance and biomass of the top 10 most abundant live trees (DBH>=12.7cm), with associated sampling errors, within ecoregion subsections which surround the Appalachian National Scenic Trail. We produced estimates for each FIA reporting year which was common among all states included in the analysis (2005-2016, with the exception of 2008).
+#### Snags and Coarse Woody Debris {.tabset }
 
-#### Stems per Acre
+Dead wood, in the form of fallen coarse woody debris (CWD) and standing dead trees (snags), are important structural features of forests that provide habitat for many taxonomic groups, including mammals, birds, herpetofauna, lichens, fungi, and insects. 
 
-<div style="float:right;position:relative;top:10px;padding:5px 5px 5px 10px;margin:0px 5px 10px 5px">
-```{r, echo = FALSE,  fig.height=5.75, fig.width= 5.75, fig.align = 'left', warning= FALSE, comment=FALSE, message=FALSE}
-pal <- colorBin("Purples", domain = tpa_All[["TPA"]], bins = 5)
+##### Snags
 
-tpa_All %>% 
-  leaflet() %>%
-  addTiles() %>%
-  addPolygons(fillColor = ~ pal(tpa_All[["TPA"]]),
-              fillOpacity = 1,
-              opacity = 0,
-              popup = paste0("<b>Ecological Section: </b>",
-                             tpa_All[["SECTION_NA"]],
-                             "<br> <b>SubSection: </b>",
-                             tpa_All[["SUBSECTI_1"]],
-                             "<br> <b>Avg. Stems per Acre,<br>: </b>",
-                             round(tpa_All[["TPA"]], 3))) %>%
-  addPolylines(data = at_centerline,
-               color = "black",
-               opacity = 1,
-               weight = 2) %>%
-  addLegend(pal = pal,
-            values = ~tpa_All[["TPA"]],
-            title = "Avg. Stems per Acre,<br>",
-            position = "bottomright",bins= 5, na.label = "") 
-```
-<p class='capwrap'>
-Map of the Average Stems (DBH >= 5' DBH) per Acre in each Subsection  </p>
-</div>
+<h3> Snag Abundance by Size Class </h3>
 
 
 <div style="float:left;position:relative;top:10px;padding:1px 1px 1px 1px;margin:0px 5px 10px 5px">
-```{r, echo=FALSE, fig.height=8, fig.width= 12, fig.align = 'right', message=FALSE}
-tpa_top10 %>% 
-  mutate(COMMON_NAME = toupper(COMMON_NAME)) %>% 
-  ggplot(aes(x = COMMON_NAME, y = TPA, fill= COMMON_NAME)) +
+```{r, echo=FALSE, fig.height=6, fig.width= 12, fig.align = 'center', message=FALSE, fig.cap= "Average density of snags (DBH ≥ 5 in.) per Acre by size class by ecological subsection."}
+snag %>% 
+  filter(SECTION_NA %in% params$section) %>% 
+  mutate(SizeClass = rFIA::makeClasses(sizeClass, interval = 5,numLabs = FALSE)) %>% 
+  ggplot(aes(x = fct_rev(SUBSECTI_1), y = TPA, fill= fct_rev(SizeClass))) +
   geom_bar(stat ="identity") +
-  #geom_line() +
-  labs(x = "",
-       y = "Stems per Acre") +
-  facet_wrap(~SECTION_NA) +
-   scale_fill_viridis_d()+
-  theme_bw() +
+  labs(x = "", y = "Snags per Acre", fill= "Size class (inches)") +
+  scale_fill_viridis_d()+
+  theme_classic() +
   coord_flip()+
-  theme(legend.position = "none")+
-  theme(strip.text = element_text(size = 9),
-        axis.text.x = element_text(angle = 0))
+  theme(legend.position = "right", legend.text= element_text(size = 14),legend.title= element_text(size = 14), axis.text = element_text(size = 14), axis.title = element_text(size = 14))
 ```
-<p class='capwrap'>
-Stems (DBH >= 5") per Acre of top 10 most abundant species per Subsection  </p>
-</div>
 
-#### Size Class Distribution
+ <!-- <h3> Abundance of Medium to Large Snags (Size Class >11.8" DBH) </h3> -->
 
-<div style="float:right;position:relative;top:10px;padding:1px 1px 1px 1px;margin:0px 5px 10px 5px">
-```{r, echo=FALSE, fig.height=8, fig.width= 12, fig.align = 'left', message=FALSE}
-tpa_top10 %>%
-   mutate(COMMON_NAME = toupper(COMMON_NAME)) %>% 
-  ggplot(aes(x = newClass,
-             y = TPA,
-             fill = COMMON_NAME)) +
-  geom_col() +
-  theme_bw() +
-  scale_fill_manual(values=mycolors) +
-  facet_wrap(~SECTION_NA, scales= "free_y")+
-  labs(
-    x = "Size Class",
-    y = "Stems per Acre",
-    fill = ""
-  ) +
-  theme(
-    legend.position = "top",
-    legend.box.just = "right",
-    legend.margin = margin(6, 6, 6, 6),
-    legend.key.height = unit(0.25, 'cm'),
-    axis.text.x = element_text(angle = 90)
-    )
-# Bar chart of mean species density and biomass per species by DBH class size for top 10 most abundant species
+```{r, echo=FALSE, eval= FALSE, fig.height=6, fig.width= 12, fig.align = 'center', message=FALSE, fig.cap = "Average density of Medium to Large snags (DBH ≥ 11.8 in.) per Acre by size class by ecological subsection."}
+snag %>% 
+  filter(SECTION_NA %in% params$section) %>%
+  filter(sizeClass >11.8) %>% # filter out snags > ~30 cm DBH (30/2.54 = 11.8)
+  mutate(SizeClass = makeClasses(sizeClass, interval = 5,numLabs = FALSE)) %>% 
+  ggplot(aes(x = fct_rev(SUBSECTI_1), y = TPA, fill= fct_rev(SizeClass))) +
+  geom_bar(stat ="identity") +
+  labs(x = "", y = "Snags per Acre", fill= "Size class (inches)") +
+  scale_fill_viridis_d()+
+  theme_classic() +
+  coord_flip()+
+  theme(legend.position = "right", legend.text= element_text(size = 14),legend.title= element_text(size = 14), axis.text = element_text(size = 14), axis.title = element_text(size = 14))
 ```
-<p class='capwrap'>
-Average density of trees per size class (inches) </p>
-</div>
 
-#### Carbon
+<h3> Percentage of Trees as Snags  </h3>
 
-<div style="float:right;position:relative;top:10px;padding:1px 1px 1px 1px;margin:0px 5px 10px 5px">
-```{r, echo=FALSE, fig.height=4, fig.width= 4, fig.align = 'left', message=FALSE}
-bio_top10 %>%
-  ggplot(aes(x = newClass,
-             y = CARB_ACRE,
-             fill = SCIENTIFIC_NAME)) +
-  geom_col() +
-  theme_bw() +
-  scale_fill_manual(values = mycolors) +
-  labs(x = "Size Class",
-       y = "Carbon/acre",
-       fill = "Scientific Name") +
-  theme(
-    legend.position = c(.999, .999),
-    legend.justification = c("right", "top"),
-    legend.box.just = "right",
-    legend.margin = margin(6, 6, 6, 6),
-    legend.key.height = unit(0.25, 'cm'),
-    axis.text.x = element_text(angle = 90)
-    )
-# Bar chart of mean species density and biomass per species by DBH class size for top 10 most abundant species
+```{r snags_live,echo=FALSE, message=FALSE}
+# calc 
+Perc_Snags<-all_tpa %>% 
+  filter(SECTION_NA %in% params$section) %>%
+  mutate(Trees = round(TPA * Acres),0) %>%  # convert back to total trees per status
+  group_by(SECTION_NA,SUBSECTI_1,STATUSCD) %>% 
+  summarise(Trees = sum (Trees)) %>%
+  pivot_wider(id_cols = c("SECTION_NA","SUBSECTI_1"), names_from = "STATUSCD", values_from = "Trees") %>% 
+  mutate(Perc_Snags = round(Dead/Live,2)*100)
+
+
+Perc_ML_Snags<-all_tpa %>% 
+  filter(SECTION_NA %in% params$section) %>%
+  filter(sizeClass >11.8) %>% # filter out snags ~> 30 cm DBH (30/2.54 = 11.8)
+  mutate(Trees = round(TPA * Acres),0) %>%  # convert back to total trees
+  group_by(SECTION_NA,SUBSECTI_1,STATUSCD) %>% 
+  summarise(Trees = sum (Trees)) %>% # sum all trees across size classes 
+  pivot_wider(id_cols = c("SECTION_NA","SUBSECTI_1"), names_from = "STATUSCD", values_from = "Trees") %>% 
+  mutate(Perc_ML_Snags = round(Dead/Live,2)*100)
+
+Perc_Snags %>%  left_join (Perc_ML_Snags, by = c("SUBSECTI_1")) %>% 
+  select(Subsection= SUBSECTI_1, `% of Trees as Snags`= Perc_Snags, `% of Trees as M-L Snags (>30 cm DBH)` = Perc_ML_Snags) %>% kableExtra::kbl(.,digits = 2, escape = FALSE, align= c("l","c","c"), longtable= T, caption= "Snag abundance per subsection. Metric ratings are based on the percent of standing trees (i.e., ≥ 5 in. diameter at breast height) that are snags. M-L Snags refers to medium to large (≥ 11.8 in. diameter at breast height) diameter snags.") %>%   kable_styling(fixed_thead = TRUE, bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
+
+
 ```
-<p class='capwrap'>
-Average Carbon per acre per size class (inches) </p>
-</div></div>
-
-### Tree Vital Rates {.tabset}
-
-Text area describing metrics and patterns of tree growth and mortality ( tree basal area, biomass  growth, stand level basal area and biomass growth. Annual mortality and recruitment)
-
-```{r}
-# Bar chart showing mean annual growth per top 10 species across region of interest (NE in this example)
-mort_year_top10 %>%
-  ggplot(aes(x = MEASYEAR, y = GROW_PERC)) +
-  geom_col() +
-  labs(x = "Measurement year",
-       y = "Mean annual growth (%)") +
-  facet_wrap(~SCIENTIFIC_NAME) +
-  theme_bw()
-
-# Similar map and bar charts for basal area and biomass growth
-
-# Tabular summary of mean annual mortality rates of top 10 species per ecoregion in area of interest (NE in this example)
-mort_year_top10 %>%
-  group_by(SCIENTIFIC_NAME) %>%
-  summarize(`Average Mortality (%)` = mean(MORT_PERC)) %>%
-  rename(`Scientific Name` = SCIENTIFIC_NAME) %>%
-  kable()
 
 
-# choropleth map for diameter growth rate (in/yr)
-pal <- colorBin("Purples", domain = mort[["GROW_PERC"]], bins = 8)
+##### Coarse Woody Debris
 
-mort %>%
-  leaflet() %>%
-  addTiles() %>%
-  addPolygons(fillColor = ~ pal(mort[["GROW_PERC"]]),
-              fillOpacity = 1,
-              opacity = 0,
-              popup = paste0("<b>Ecosubsection: </b>",
-                             mort[["SUBSECTION"]],
-                             "<br> <b>mean annual growth on survivors (%): </b>",
-                             round(mort[["GROW_PERC"]], 3))) %>%
-  addPolylines(data = at_centerline,
-               color = "black",
-               opacity = 1,
-               weight = 2) %>%
-  addLegend(pal = pal,
-            values = ~mort[["GROW_PERC"]],
-            title = "mean annual growth on survivors (%)",
-            position = "bottomright") 
+```{r CWD, fig.align='center',echo=FALSE, message=FALSE}
+
+live_VOL<- live_vol %>% 
+  filter(SECTION_NA %in% params$section) %>%
+  select(SECTION_NA, SUBSECTI_1, LiveTree_VOL= BOLE_CF_ACRE, LiveTree_VOL_SE= BOLE_CF_ACRE_SE)#estimate of mean merchantable bole volume per acre (cu.ft./acre)
+
+downwoody %>% 
+  filter(SECTION_NA %in% params$section) %>%
+  filter(FUEL_TYPE %in% "1000HR") %>% # extract the fuel type of CWD, in cubic ft/acre
+  left_join(., live_VOL, by=c("SECTION_NA","SUBSECTI_1")) %>% #add live tree biomass estimates (in cubic ft/acre)
+  #mutate() %>% # calculate unit conversions to cubic meters/ha
+  mutate(`CWD:Live Tree Volume` = round((VOL_ACRE/LiveTree_VOL)*100,1), `CWD Volume (SE)` = paste(round(VOL_ACRE,1),"(",round(VOL_ACRE_SE,1),")"), `Live Tree Volume (SE)` = paste(round(LiveTree_VOL,1),"(",round(LiveTree_VOL_SE,1),")")) %>% 
+  select(`Ecol. Subsection` = SUBSECTI_1, `No. Plots` = nPlots_DWM, `CWD Volume (SE)`, `Live Tree Volume (SE)`, `CWD:Live Tree Volume`) %>% 
+ kableExtra::kbl(.,digits = 2, escape = FALSE, align= c("l","c","c","c","c"), longtable= T, caption= paste0("Coarse woody debris metrics for each subsection of the ", params$section,". The CWD Ratio is the ratio of CWD volume to live tree volume, and is expressed as a percent.")) %>% 
+  kable_styling(fixed_thead = TRUE, bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+
+```
+
+### Composition and Health {.tabset }
+
+FIA data summarizes are provided for metrics across all species and for the top 10 most abundant species and other native species ("Other Species") within the ` r params$section ` Ecological Section from the most recent survey (will add in year range here).
+
+#### Tree Composition {.tabset }
+
+##### Size Class Distribution
+
+```{r SizeClass, echo=FALSE, fig.height=8, fig.width= 12, fig.align = 'center', message=FALSE, fig.cap ="Size Class Distribution of live trees in each ecological subsection"}
+
+# determine the top10 most abundant species by averaging basal area per SubSection at the Section scale
+top10<-tpa_Spp %>% # determine top10 species per Section
+  filter(SECTION_NA %in% params$section) %>% # filter out data by Section scale
+  group_by(COMMON_NAME) %>% 
+  summarize(Avg_BAA = mean (BAA)) %>% 
+  arrange(desc(Avg_BAA)) %>% slice(1:10) %>% pull(COMMON_NAME)
+
+# Calc SE in BAA at SubSection scale (still need to add as layer in figure)
+# SE_DBH<-tpa_Spp_SizeCl %>% as_tibble() %>% 
+#   filter(SECTION_NA %in% params$section) %>% # filter out data by Section scale
+#   filter(COMMON_NAME %in% top10) %>% 
+#   group_by(SECTION_NA,SUBSECTI_1, newClass) %>% summarise(BAA_DBH_SE = sd(BAA)/sqrt(n()))
+
+tpa_Spp_SizeCl %>%  
+  filter(SECTION_NA %in% params$section) %>% # filter out data by Section scale
+   mutate(species = case_when(COMMON_NAME %in% top10 ~ COMMON_NAME, !COMMON_NAME %in% top10 ~ "Other Species")) %>% #rename species
+ # filter(COMMON_NAME %in% top10) %>% 
+  ggplot(aes(x = newClass, y = BAA, fill= stringr::str_to_title(species))) +
+  geom_bar(stat ="identity") +
+  labs(x = "Size class (inches)", y = "Average Basal Area per Acre + SE", fill = "Common Name") +
+  scale_fill_viridis_d()+
+  facet_wrap(~SUBSECTI_1)+
+  theme_classic() +
+  theme(legend.position = "right", axis.text = element_text(size = 14), axis.title = element_text(size = 14),
+        axis.text.x= element_text(angle = 90), strip.text = element_text(size =  14, face ="bold"),legend.text= element_text(size = 14),legend.title= element_text(size = 14))
+
+```
+
+##### Basal Area
+
+<h3> Average basal area of all Species </h3>
+
+```{r live_BAA, echo=FALSE, fig.height=6, fig.width= 12, fig.align = 'center', message=FALSE, fig.cap ="Average basal area (+SE) of live trees (DBH ≥ 5 in.) in each ecological subsection"}
+tpa_live %>% 
+  filter(SECTION_NA %in% params$section) %>%
+  ggplot(aes(x = fct_rev(SUBSECTI_1), y = BAA, fill= SUBSECTI_1)) +
+  geom_bar(stat ="identity") +
+  geom_errorbar(aes(ymax= BAA+BAA_SE, ymin= BAA, color= SUBSECTI_1))+
+  labs(x = "", y = "Average Basal Area per Acre + SE") +
+  scale_fill_viridis_d()+scale_color_viridis_d()+
+  theme_classic() +
+  coord_flip()+
+  theme(legend.position = "none", axis.text = element_text(size = 14), axis.title = element_text(size = 14))
+```
+
+<h3> Average Basal Area per Species</h3>
+
+```{r top10live_BAA, echo=FALSE, fig.height=6, fig.width= 12, fig.align = 'center', message=FALSE, fig.cap ="Average basal area per species of live trees (DBH ≥ 5 in.) in each ecological subsection"}
+
+# determine the top10 most abundant species by averaging basal area per SubSection at the Section scale
+top10<-tpa_Spp %>% # determine top10 species per Section
+  filter(SECTION_NA %in% params$section) %>% # filter out data by Section scale
+  group_by(COMMON_NAME) %>% 
+  summarize(Avg_BAA = mean (BAA)) %>% 
+  arrange(desc(Avg_BAA)) %>% slice(1:10) %>% pull(COMMON_NAME)
+
+tpa_Spp %>% 
+  filter(SECTION_NA %in% params$section) %>% # filter out data by Section scale
+  mutate(species = case_when(COMMON_NAME %in% top10 ~ COMMON_NAME, !COMMON_NAME %in% top10 ~ "Other Species")) %>% #rename species
+ # filter(COMMON_NAME %in% top10) %>% 
+  ggplot(aes(x = fct_rev(SUBSECTI_1), y = BAA, fill= stringr::str_to_title(species))) +
+  geom_bar(stat ="identity") +
+  labs(x = "", y = "Average Basal Area per Acre", fill = "Common Name") +
+  scale_fill_viridis_d()+
+  theme_classic() +
+  coord_flip()+
+  theme(legend.position = "right", axis.text = element_text(size = 14), axis.title = element_text(size = 14),legend.text= element_text(size = 14),legend.title= element_text(size = 14))
+```
+
+#### Tree Condition
+
+No summary data for this but not sure will include this as a objective. 
+
+#### Tree Growth and Mortality
+
+Tree growth and mortality rates are important indicators of tree health and vitality. Tree growth rates can decline in response to environmental factors or anthropogenic stress, and tree mortality is often preceded by some years of reduced tree growth (Ward and Stephens 1997, Pedersen 1998, Dobbertin 2005). Decreased growth or elevated mortality rate in trees of a particular species can indicate a particular health problem for that species (Duchesne et al. 2003, Hyink and Zedeker 1987); while altered vital rates for multiple species across a region may indicate a regional environmental stress, such as acid deposition (Steinman 2004, Dobbertin 2005).
+
+<h3> Growth </h3>
+
+```{r growth,}
+# Tabular summary of mean annual mortality rates of top 10 species per ecoregion in area of interest 
+# determine the top10 most abundant species by averaging basal area per SubSection at the Section scale
+
+top10<-tpa_Spp %>% # determine top10 species per Section
+  filter(SECTION_NA %in% params$section) %>% # filter out data by Section scale
+  group_by(COMMON_NAME) %>% 
+  summarize(Avg_BAA = mean (BAA)) %>% 
+  arrange(desc(Avg_BAA)) %>% slice(1:10) %>% pull(COMMON_NAME)
+
+# growth rate table
+growth %>% as_tibble() %>% 
+  filter(SECTION_NA %in% params$section) %>% # filter out data by Section scale
+  filter(COMMON_NAME %in% top10) %>% 
+  mutate(Growth = paste(round(DIA_GROW,2),"(", round(sqrt(DIA_GROW_VAR)/sqrt(N),3),")"),
+    COMMON_NAME =  stringr::str_to_sentence(COMMON_NAME)) %>% arrange(SUBSECTI_1, SCIENTIFIC_NAME) %>% 
+  select(SubSection = SUBSECTI_1, `Common Name` = COMMON_NAME, `Latin Name`= SCIENTIFIC_NAME, Growth) %>%
+  pivot_wider(.,id_cols=  c(`Common Name`,`Latin Name`), values_from = Growth, names_from = SubSection ) %>% 
+   kableExtra::kbl(.,digits = 2, escape = FALSE, align= "l", longtable= T, caption= paste0("Average annual diameter growth (inches) (SE) of trees (DBH ≥ 5 in.) within each subsection of the ", params$section,".")) %>% column_spec(.,column= 2,italic=T) %>% 
+  kable_styling(fixed_thead = TRUE, bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+```
+
+<h3> Mortality </h3>
+
+```{r mort,}
+# Tabular summary of mean annual mortality rates of top 10 species per ecoregion in area of interest 
+# determine the top10 most abundant species by averaging basal area per SubSection at the Section scale
+
+top10<-tpa_Spp %>% # determine top10 species per Section
+  filter(SECTION_NA %in% params$section) %>% # filter out data by Section scale
+  group_by(COMMON_NAME) %>% 
+  summarize(Avg_BAA = mean (BAA)) %>% 
+  arrange(desc(Avg_BAA)) %>% slice(1:10) %>% pull(COMMON_NAME)
+  
+# mortality rates table
+mort %>% as_tibble() %>% 
+  filter(SECTION_NA %in% params$section) %>% # filter out data by Section scale
+  filter(COMMON_NAME %in% top10) %>% 
+  mutate(Mortality = paste(round(MORT_PERC,2),"(",round(sqrt(MORT_PERC_VAR)/sqrt(N),3),")"),
+         COMMON_NAME =  stringr::str_to_sentence(COMMON_NAME)) %>% arrange(SUBSECTI_1,SCIENTIFIC_NAME) %>% 
+  select(SubSection = SUBSECTI_1, `Common Name` = COMMON_NAME, `Latin Name`= SCIENTIFIC_NAME, Mortality) %>%
+  pivot_wider(.,id_cols=  c(`Common Name`,`Latin Name`), values_from = Mortality, names_from = SubSection ) %>% 
+   kableExtra::kbl(.,digits = 2, escape = FALSE, align= "l", longtable= T, caption= paste0("Average annual percent mortality rates (SE) of trees (DBH ≥ 5 in.) within each subsection of the ", params$section,".")) %>% column_spec(.,column= 2,italic=T) %>% 
+  kable_styling(fixed_thead = TRUE, bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
   
 ```
 
-### Regeneration
 
-Text area describing regeneration.
+#### Regeneration 
 
-This tab would show only density and I can’t recall whether FIA denotes regen by size classes. For regen we commonly use 15-30 cm, 30-100cm, 100-150cm, > 150 and <1cm DBH, and 1-10 cm DBH
-
-<div style="float:right;position:relative;top:10px;padding:1px 1px 1px 1px;margin:0px 5px 10px 5px">
-```{r, echo=FALSE, fig.height=4, fig.width= 4, fig.align = 'left', message=FALSE}
-ggplot()
-# Bar chart of mean species density per species by DBH class size for top 10 most abundant species
-```
-</div>
-
-<div style="float:left;position:relative;top:10px;padding:1px 1px 1px 1px;margin:0px 5px 10px 5px">
-```{r, echo=FALSE, fig.height=4, fig.width= 4, fig.align = 'right', message=FALSE}
-ggplot()
-# Time series plot showing sapling density (1-10 DBH) over time per species and ecoregion. 
-
-# We also commonly report regen as a stocking index based on McWilliams (~2005). It estimates density by weighting the above size classes.
-```
-</div>
-
-### Snags
-
-Text area describing snags per acre and by size class.
+<h3> Regeneration of All Species </h3>
 
 <div style="float:right;position:relative;top:10px;padding:1px 1px 1px 1px;margin:0px 5px 10px 5px">
-```{r, echo=FALSE, fig.height=4, fig.width= 4, fig.align = 'left', message=FALSE}
-ggplot()
-# BBar chart of mean snag density per diameter size class for hard vs softwood (if possible)
-```
-</div>
+```{r regen, echo=FALSE, fig.height=6, fig.width= 12, fig.align = 'left', message=FALSE, fig.cap= "Average density (+SE) of all regenerating stems (< 5 in. DBH) by ecological subsection."}
 
-<div style="float:left;position:relative;top:10px;padding:1px 1px 1px 1px;margin:0px 5px 10px 5px">
-```{r, echo=FALSE, fig.height=4, fig.width= 4, fig.align = 'right', message=FALSE}
-ggplot()
-# Chloropleth map showing % snag abundance of total TPA; see Snag abundance | rFIA
-```
-</div>
-
-### Downed Woody Debris
-
-Text area describing DWD: volume and CWD:live tree volume
-
-A table like this one?
-
-```{r, fig.align='center'}
-knitr::include_graphics("dwd_table.png")
-
-downwoody %>%
-  group_by(SUBSECTION) %>%
-  summarize(
-    sum(nPlots_DWM),
-    sum(nPlots_AREA),
-    mean(VOL_ACRE),
-    mean(BIO_ACRE),
-    mean(CARB_ACRE)
-  ) %>%
-  kable()
+seedlings %>% bind_rows(., saplings) %>% # bring in seedling data (<1 " DBH) and sapling data (1-5" D)
+  filter(SECTION_NA %in% params$section) %>%
+  ggplot(aes(x = fct_rev(SUBSECTI_1), y = TPA, fill= variable)) +
+  geom_bar(stat ="identity",position='dodge') +
+  geom_errorbar(aes(ymax= TPA+TPA_SE, ymin= TPA, color= variable),stat ="identity",position='dodge')+
+  labs(x = "", y = "Average Stems per Acre + SE", fill ="", color="") +
+  scale_fill_viridis_d()+scale_color_viridis_d()+
+  coord_flip()+
+  theme_bw() +
+ theme(legend.position = "right", axis.text = element_text(size = 14), axis.title = element_text(size = 14),
+        axis.text.x= element_text(angle = 0), strip.text = element_text(size =  14, face ="bold"),legend.text= element_text(size = 14),legend.title= element_text(size = 14))
 ```
 
 
-### Invasive Plants
+<h3> Regeneration By Species</h3>
 
-Text area describing invasive abundance of top species (shrubs and trees).
+```{r regenSpp, echo=FALSE, fig.height=8, fig.width= 12, fig.align = 'left', message=FALSE, fig.cap= "Average density (+SE) of regenerating stems (< 5 in. DBH) of the 10 most abundant species by ecological subsection."}
 
-Combination of chloropleth maps and time series of key species per region. It may only be possible to generate a tabular summary of presence per ecoregion depending on the state, panel and species of interest. This section could also just be a list of species detected with frequency.
+# determine the top10 most abundant species by averaging basal area per SubSection at the Section scale
+top10<-tpa_Spp %>% # determine top10 species per Section
+  filter(SECTION_NA %in% params$section) %>% # filter out data by Section scale
+  group_by(COMMON_NAME) %>% 
+  summarize(Avg_BAA = mean (BAA)) %>% 
+  arrange(desc(Avg_BAA)) %>% slice(1:10) %>% pull(COMMON_NAME)
 
+seedlingsSpp %>% bind_rows(., saplings_Spp) %>% # bring in seedling data (<1 " DBH) and sapling data (1-5" D)  %>% 
+  filter(SECTION_NA %in% params$section) %>% # filter out data by Section scale 
+  mutate(species = case_when(COMMON_NAME %in% top10 ~ COMMON_NAME, !COMMON_NAME %in% top10 ~ "Other Species")) %>% #rename species
+ # filter(COMMON_NAME %in% top10) %>%
+  ggplot(aes(x = fct_rev(stringr::str_to_sentence(species)), y = TPA, fill= variable)) +
+  geom_bar(stat = "identity",position = "dodge")+
+  labs(x = "", y = "Average Stems per Acre", fill = "") +
+  scale_fill_viridis_d()+
+  facet_wrap(~SUBSECTI_1)+
+  coord_flip()+
+  theme_bw() +
+  theme(legend.position = "top", axis.text = element_text(size = 14), axis.title = element_text(size = 14),
+        axis.text.x= element_text(angle = 0), strip.text = element_text(size =  12, face ="bold"),legend.text= element_text(size = 14),legend.title= element_text(size = 14))
+
+```
+
+``` {r, regen_table, echo=FALSE, message=FALSE}
+top10<-tpa_Spp %>% # determine top10 species per Section
+  filter(SECTION_NA %in% params$section) %>% # filter out data by Section scale
+  group_by(COMMON_NAME) %>% 
+  summarize(Avg_BAA = mean (BAA)) %>% 
+  arrange(desc(Avg_BAA)) %>% slice(1:10) %>% pull(COMMON_NAME)
+
+seedlingsSpp %>% bind_rows(., saplings_Spp) %>%
+  filter(SECTION_NA %in% params$section) %>% # filter out data by Section scale
+  #mutate(`Avg. Stems Per Acre (SE)` = = paste(round(TPA,2),"(", round(sqrt(TPA_VAR)/sqrt(N),3),")"))
+  mutate(COMMON_NAME =  stringr::str_to_sentence(COMMON_NAME),
+         `Percent Plots Present` = (nPlots_TREE/N)*100) %>% arrange(SUBSECTI_1,COMMON_NAME) %>% 
+  select(`Ecol. Subsection` = SUBSECTI_1, `Common Name` = COMMON_NAME, `Latin Name`= SCIENTIFIC_NAME,Stage= variable, `Avg. Stems Per Acre (SE)` = TPA, `Plots Present`= nPlots_TREE, `Percent Plots Present`) %>%  
+  kableExtra::kbl(.,digits = 1, escape = FALSE, align= "l", longtable= T, caption= paste0("Average annual percent cover and plot frequency of invasive plants detected within each subsection of the ", params$section," during each measurement year.")) %>% column_spec(.,column= 4,italic=T) %>% collapse_rows(.,columns = 1:3, valign = "top") %>% column_spec(.,column= 3,italic=T) %>%
+  kable_styling(fixed_thead = TRUE, bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
+
+```
+
+#### Invasive Plants
+
+``` {r invPlot,echo=FALSE, fig.height=6, fig.width= 12, fig.align = 'center', message=FALSE, fig.cap= "Average annual percent cover of invasive plants detected within each subsection."}
+
+invasives %>% as_tibble() %>% 
+  filter(SECTION_NA %in% params$section) %>% # filter out data by Section scale
+  mutate(SE= round(sqrt(COVER_PCT_VAR)/sqrt(N),3),
+         COMMON_NAME =  stringr::str_to_sentence(COMMON_NAME))%>% 
+  select(SUBSECTI_1, Year= MEASYEAR,COMMON_NAME,  COVER_PCT, SE)%>%   
+  ggplot(aes(x = Year, y = COVER_PCT, color= SUBSECTI_1 )) +
+  geom_point() + geom_errorbar(aes(ymin= COVER_PCT-SE, ymax= COVER_PCT+SE))+
+  labs(x = "", y = "Average Percent Cover + SE", color = "") +
+  #scale_color_viridis_d()+
+  theme_classic() +
+  facet_wrap(~stringr::str_to_title(COMMON_NAME))+
+  theme(legend.position = "top", axis.text = element_text(size = 14), axis.title = element_text(size = 14),
+        axis.text.x= element_text(angle = 0), strip.text = element_text(size =  14, face ="bold"),legend.text= element_text(size = 14),legend.title= element_text(size = 14))
+```
+  
+  
+``` {r invasives,echo=FALSE, warning= FALSE, comment=FALSE, message=FALSE}
+invasives %>% as_tibble() %>% 
+  filter(SECTION_NA %in% params$section) %>% # filter out data by Section scale
+  mutate(`Percent Cover (SE)`= paste(round(COVER_PCT,2),"(", round(sqrt(COVER_PCT_VAR)/sqrt(N),3),")"),
+         COMMON_NAME =  stringr::str_to_sentence(COMMON_NAME),
+         `Percent Plots Present` = (nPlots_INV/N)*100) %>% arrange(SUBSECTI_1,COMMON_NAME) %>% 
+  select(`Ecol. Subsection` = SUBSECTI_1, Year= MEASYEAR,`Common Name` = COMMON_NAME, `Latin Name`= SCIENTIFIC_NAME, `Percent Cover (SE)`, `Plots Present`= nPlots_INV, `Percent Plots Present`) %>% 
+  kableExtra::kbl(.,digits = 2, escape = FALSE, align= "l", longtable= T, caption= paste0("Average annual percent cover and plot frequency of invasive plants detected within each subsection of the ", params$section," during each measurement year.")) %>% column_spec(.,column= 4,italic=T) %>% collapse_rows(.,columns = 1, valign = "top") %>% 
+  kable_styling(fixed_thead = TRUE, bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
+
+```
+
+  
+  
 ### References
+
+Cleland, D.T.; Freeouf, J.A.; Keys, J.E.; Nowacki, G.J.; Carpenter, C.A.; and McNab, W.H. 2007. Ecological Subregions: Sections and Subsections for the conterminous United States. Gen. Tech. Report WO-76D
 
 Dieffenbach, F, 2011. Appalachian National Scenic Trail vital signs monitoring plan. Natural Resource Technical Report NPS/NETN/NRR—2011/389. National Park Service, Northeast Temperate Network, Woodstock, VT.
 
 Dieffenbach, F. 2018. Appalachian National Scenic Trail forest health monitoring protocol. Natural Resource Report NPS/NETN/NRR—2018/1804. National Park Service, Fort Collins, Colorado.
 
-Stanke, Hunter, Andrew O. Finley, A. S. Weed, Brian F. Walters, and Grant M. Domke. 2020. rFIA: An R package for estimation of forest       attributes with the US Forest Inventory and Analysis database. Environmental Modelling & Software 127: 104664.
+Stanke, H. and Finley, A., 2020. rFIA: Space-Time Estimation of Forest Variables using the FIA Database. R package version, 1.0.
+
+Stanke, H., Finley, A.O., Weed, A.S., Walters, B.F., and Domke, G.M. 2020. rFIA: An R package for estimation of forest attributes with the US Forest Inventory and Analysis database. Environmental Modelling & Software 127: 104664.
 
